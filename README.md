@@ -19,6 +19,8 @@
 ## Idea & Approach
 We want to deliver a framework as a service for railway and transport companies worldwide to decrease delays and increase the punctuality of trains. This increases customer satisfaction and therby the usage which is a big benefit for our world fighting against climate change.
 
+## Technology
+
 ## Team
 - [Ayman Madhour](https://github.com/Madhour)
 - [Lukas Benner](https://github.com/BennerLukas)
