@@ -12,11 +12,20 @@ black = 255, 255, 255
 
 
 class Zug:
-    def __init__(self, grid: List, gridsize: int):
-        self.speed = [1, 0]
+    def __init__(self, id: int, grid: List, gridsize: int, start_x: int, start_y: int, starting_rotation:float = 0,
+                 start_speed: list[int, int] = [1, 0]):
+        self.id = id
+
+        self.speed = start_speed
+
         self.train = pygame.transform.scale(pygame.image.load("assets/train_icon.png"), (64, 64 * 0.3))
+        self.train = pygame.transform.rotate(self.train, starting_rotation)
+
         self.train_rect = self.train.get_rect()
-        self.direction = "0"
+        self.train_rect.x = start_x
+        self.train_rect.y = start_y
+
+        self.direction = "-"
         self.grid = grid
         self.gridsize = gridsize
 
@@ -53,35 +62,45 @@ class Zug:
                 self.direction = "-"
         elif grid_item == "||":
             self.speed = [0, 0]
-            print("HERE", self.speed)
-        print(f"Grid Item: {grid_item} | Changed state: {self.direction} | Neuer Speed: {self.speed}")
+        print(f"ID: {self.id} | Grid Item: {grid_item} | Changed state: {self.direction} | X,Y = {self.train_rect.x, self.train_rect.y}")
+
+    def move_train(self):
+        self.train_rect = self.train_rect.move(self.speed)
+
+    def render_frame(self):
+        self.change_speed()
+        self.move_train()
 
 
 bg = pygame.image.load("assets/bg_map.png").convert()
 
 grid_width = width // 100
 grid_height = height // 100
-flipped = False
+grid = [["-", "-", "-", "-", "v", ">", "-", "-", "-", "||"],
+        ["-", ">", "-", "-", "|", "|", "-", "||", "-", "-"],
+        ["-", "|", "-", "-", ">", "|", "-", "v", "-", "-"],
+        ["-", "^", "-", "-", "-", "|", "-", "<", "-", "-"],
+        ["-", "-", "-", "-", "-", "^", "-", "-", "-", "-"]]
 
-grid = [["-", "-", "-", "-", "v", "-", "-", "-", "-", "-"],
-        ["-", ">", "-", "||", "|", "-", "-", "-", "-", "-"],
-        ["-", "|", "-", "-", ">", "-", "-", "v", "-", "-"],
-        ["-", "^", "-", "-", "-", "-", "-", "<", "-", "-"],
-        ["-", "-", "-", "-", "-", "-", "-", "-", "-", "-"]]
-
-train = Zug(grid, 100)
-
+train1 = Zug(1, grid, 100, 0, 0)
+train2 = Zug(2, grid, 100, 900, 300, 180, [-1, 0])
+train3 = Zug(3, grid, 100, 0, 450)
+trains = [train1, train2, train3]
 while True:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             sys.exit()
 
-    train.change_speed()
-    train.train_rect = train.train_rect.move(train.speed)
+    for train in trains:
+        train.render_frame()
+
 
     screen.fill(black)
     # screen.blit(bg, (0, 0))
-    screen.blit(train.train, train.train_rect)
 
+    screen.blit(train1.train, train1.train_rect)
+    screen.blit(train2.train, train2.train_rect)
+    screen.blit(train3.train, train3.train_rect)
+    screen.blits([[x.train, x.train_rect] for x in trains])
     pygame.display.flip()
-    time.sleep(0.01)
+    time.sleep(0.005)
