@@ -17,7 +17,7 @@
 ## Usage
 
 ## Idea & Approach
-We want to deliver a framework as a service for railway and transport companies worldwide to decrease delays and increase the punctuality of trains. This increases customer satisfaction and therby the usage which is a big benefit for our world fighting against climate change.
+We want to deliver a a service for railway and transport companies worldwide to decrease delays and increase the punctuality of trains. This increases customer satisfaction and therby the usage. This has a big benefit for our world, fighting against climate change and traffic jams.
 
 ## Technology
 
