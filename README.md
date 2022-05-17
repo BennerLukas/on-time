@@ -1,10 +1,7 @@
-<div align="center">
-# <img src="./Docs/LibCap_simple_black.png" alt="Logo" width="210" align="center"/>
+![cover](https://user-images.githubusercontent.com/46084416/168815437-488b523e-f27f-4f10-acb0-2563fc022376.png)
+
 <br>
 <br>
-
-</div>
-
 
 
 ![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BennerLukas/on-time?include_prereleases)
