@@ -3,6 +3,12 @@
 <br>
 </div>
 
+![GitHub release (latest by date including pre-releases)](https://img.shields.io/github/v/release/BennerLukas/on-time?include_prereleases)
+[![GitHub issues](https://img.shields.io/github/issues/BennerLukas/on-time)](https://github.com/BennerLukas/on-time/issues)
+[![GitHub license](https://img.shields.io/github/license/BennerLukas/on-time)](https://github.com/BennerLukas/on-time/blob/main/LICENSE)
+[![GitHub forks](https://img.shields.io/github/forks/BennerLukas/on-time)](https://github.com/BennerLukas/on-time/network)
+[![GitHub stars](https://img.shields.io/github/stars/BennerLukas/on-time)](https://github.com/BennerLukas/on-time/stargazers)
+![GitHub all releases](https://img.shields.io/github/downloads/BennerLukas/on-time/total)
 
 ## Usage
 
