@@ -72,6 +72,41 @@ class Zug:
         self.move_train()
 
 
+def draw_screen():
+    height = 64
+    width = 64
+    for cnt_row, x in enumerate(grid):
+        for cnt_col, y in enumerate(x):
+            if y == "-":
+                image = pygame.image.load("assets/schiene_horizontal.png").convert()
+                screen.blit(image, (cnt_row*64, cnt_col*64))
+            elif y == "|":
+                image = pygame.image.load("assets/schiene_vertikal.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+            elif y == "^":
+                image = pygame.image.load("assets/schiene_weiche_hoch.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+            elif y == "^":
+                image = pygame.image.load("assets/schiene_weiche_hoch.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+            elif y == "v":
+                image = pygame.image.load("assets/schiene_weiche_runter.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+            elif y == "<":
+                image = pygame.image.load("assets/schiene_weiche_links.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+            elif y == ">":
+                image = pygame.image.load("assets/schiene_weiche_rechts.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+            elif y == "||":
+                image = pygame.image.load("assets/signal.png").convert()
+                screen.blit(image, (cnt_row * 64, cnt_col * 64))
+
+    pygame.display.flip()
+
+
+
+
 bg = pygame.image.load("assets/bg_map.png").convert()
 
 grid_width = width // 100
