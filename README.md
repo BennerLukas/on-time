@@ -22,7 +22,7 @@ We want to deliver a service for railway and transport companies worldwide to de
 - [Ayman Madhour](https://github.com/Madhour)
 - [Lukas Benner](https://github.com/BennerLukas)
 - [Alina Buss](https://github.com/Alinabuss)
-- [Philip Lange](https://github.com/Sabokou)
+- [Phillip Lange](https://github.com/Sabokou)
 - [Paula Hölterhoff](https://github.com/phoelti)
 
 ## Business
