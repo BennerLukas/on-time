@@ -61,8 +61,10 @@ class Zug:
         elif grid_item == "|":
             if self.direction == "^":
                 self.speed = [0, 1]
+                print("up |")
             elif self.direction == "v":
                 self.speed = [0, -1]
+                print("down |")
 
         elif grid_item == ">":
             "Turning eastbound"
@@ -108,10 +110,13 @@ class Zug:
                 self.train = pygame.transform.rotate(self.train, 90)
                 self.direction = "v"
 
+            elif grid_item == "|":
+                self.speed = [0, 0]
+
         if self.previous_symbol != grid_item:
             print(
-                f"ID: {self.id} | Grid Item: {grid_item} | Prev Item: {self.previous_symbol} | \n"
-                f" X,Y = {self.train_rect.x, self.train_rect.y} | Speed: {self.speed}")
+                f"ID: {self.id} | Current Grid Item: {grid_item} | Prev Item: {self.previous_symbol} | \n"
+                f"X,Y = {self.train_rect.x, self.train_rect.y} | New Speed: {self.speed} | Direction: {self.direction}")
             self.previous_symbol = grid_item
 
     def move_train(self):
@@ -202,13 +207,14 @@ grid_signal = [
     ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '']
 ]
 
-train1 = Zug(1, grid, grid_signal, gridsize=64, start_x=3 * 64, start_y=7 * 64 + 63, starting_rotation=0,
-             starting_direction=">")
-train2 = Zug(2, grid, grid_signal, gridsize=64, start_x=20 * 64, start_y=5 * 64 + 63, starting_rotation=180,
-             starting_direction="<")
+# train1 = Zug(1, grid, grid_signal, gridsize=64, start_x=3 * 64, start_y=7 * 64 + 63, starting_rotation=0,
+#              starting_direction=">")
+# train2 = Zug(2, grid, grid_signal, gridsize=64, start_x=20 * 64, start_y=5 * 64 + 63, starting_rotation=180,
+#              starting_direction="<")
 train3 = Zug(3, grid, grid_signal, gridsize=64, start_x=12 * 64, start_y=1 * 64, starting_rotation=180,
              starting_direction="<")
-trains = [train1, train2, train3]
+trains = [train3]
+# trains = [train1, train2, train3]
 
 
 def eval_crash(train_obj_1: Zug, train_obj_2: Zug):
@@ -231,8 +237,8 @@ while True:
     screen.fill(black)
     # screen.blit(bg, (0, 0))
 
-    screen.blit(train1.train, train1.train_rect)
-    screen.blit(train2.train, train2.train_rect)
+    # screen.blit(train1.train, train1.train_rect)
+    # screen.blit(train2.train, train2.train_rect)
     screen.blit(train3.train, train3.train_rect)
     screen.blits([[x.train, x.train_rect] for x in trains])
     pygame.display.flip()
