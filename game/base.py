@@ -1,3 +1,4 @@
+import random
 import sys
 
 
@@ -142,9 +143,11 @@ class Grid:
 
     def update_world(self):
         self.step += 1
-        for tile in self.train_grid:
-            if type(tile) == Zug and tile.step != self.step:
-                reward = reward + self.update_train(tile.read_track())
+        reward = 0
+        for row in self.train_grid:
+            for tile in row:
+                if type(tile) == Zug and tile.step != self.step:
+                    reward = tile + self.update_train(tile.read_track())
         return reward
 
     def change_world_state(self, action_list):
@@ -154,14 +157,23 @@ class Grid:
 
 
 class Zug:
-    def __int__(self, start_x: int, start_y: int, direction: str, grid: Grid, delay: int = 0):
-        super().__init__()
+    def __init__(self, start_x: int, start_y: int, direction: str, grid: Grid, stops: list[str], delay: int = 0):
+        """
+        :param start_x:
+        :param start_y:
+        :param direction:
+        :param grid:
+        :param stops:
+        :param delay:
+        :return:
+        """
         self.x = start_x
         self.y = start_y
         self.direction = direction
         self.grid = grid
         self.delay = delay
         self.step = self.grid.add_train_to_grid(self.x, self.y, self)
+        self.stops = stops
 
     def read_track(self):
         grid_symbol = self.grid[self.y][self.x]
@@ -231,13 +243,29 @@ class Zug:
         self.step += 1
 
 
+def create_line(line_number: int, reverse: bool, grid: Grid):
+    delay = random.randint(0, 3)
+    if line_number == 1:
+        stops = ["T", "B", "U", "P", "M", "A"]
+        if reverse is False:
+            line = Zug(start_x=39, start_y=12, direction="<", grid=grid, stops=stops, delay=delay)
+        else:
+            line = Zug(start_x=19, start_y=0, direction="v", grid=grid, stops=stops, delay=delay)
+    return line
+
+
 def step(grid, actions, *args):
-    for train in args:
-        grid.add_train_to_grid(train.get("x"), train.get("y"), train.get("train"))
-    # grid.change_world_state(actions)
+    if grid.step % 10 == 1:
+        trains.append(create_line(1, False, grid))
     reward = grid.update_world()
+    print(f"Step: {grid.step}, {reward}")
+    for i in grid.train_grid:
+        print(i)
     return grid.grid, reward, False
 
 
 if __name__ == "__main__":
     gridworld = Grid()
+    trains = list()
+    for i in range(5):
+        step(gridworld, None)
