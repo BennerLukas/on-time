@@ -177,7 +177,9 @@ class Zug:
         self.stops = stops
 
     def read_track(self):
+
         grid_symbol = self.grid.grid[self.y][self.x]
+
         # left / right horizontal
         if grid_symbol == "-":
             if self.direction == "<":
@@ -186,6 +188,12 @@ class Zug:
             elif self.direction == ">":
                 new_x = self.x + 1
                 new_y = self.y
+            elif self.direction == "^":
+                new_x = self.x
+                new_y = self.y - 1
+            elif self.direction == "v":
+                new_x = self.x
+                new_y = self.y + 1
 
         # up / down vertical
         elif grid_symbol == "|":
@@ -195,6 +203,13 @@ class Zug:
             elif self.direction == "v":
                 new_x = self.x
                 new_y = self.y + 1
+            elif self.direction == ">":
+                new_x = self.x + 1
+                new_y = self.y
+            elif self.direction == "<":
+                new_x = self.x - 1
+                new_y = self.y
+
         # station / reward tile
         elif grid_symbol == "10":
             if self.direction == "^":
