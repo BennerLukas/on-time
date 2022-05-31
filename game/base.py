@@ -130,7 +130,7 @@ class Grid:
         return self.step
 
     def update_train(self, *args):
-        new_x, new_y, reward = args
+        new_x, new_y, reward, tile = args[0]
         expected_new_tile = self.train_grid[new_y][new_y]
         if type(expected_new_tile) == Zug and expected_new_tile.step != self.step:
             reward += self.update_train(expected_new_tile)
@@ -139,6 +139,7 @@ class Grid:
         elif type(expected_new_tile) == Zug and expected_new_tile.step == self.step:
             return -1
         else:
+            tile.move(new_x, new_y)
             return 0
 
     def update_world(self):
@@ -147,7 +148,7 @@ class Grid:
         for row in self.train_grid:
             for tile in row:
                 if type(tile) == Zug and tile.step != self.step:
-                    reward = tile + self.update_train(tile.read_track())
+                    reward = 0 + self.update_train(tile.read_track())
         return reward
 
     def change_world_state(self, action_list):
@@ -176,31 +177,38 @@ class Zug:
         self.stops = stops
 
     def read_track(self):
-        grid_symbol = self.grid[self.y][self.x]
+        grid_symbol = self.grid.grid[self.y][self.x]
         # left / right horizontal
         if grid_symbol == "-":
             if self.direction == "<":
                 new_x = self.x - 1
+                new_y = self.y
             elif self.direction == ">":
                 new_x = self.x + 1
+                new_y = self.y
 
         # up / down vertical
         elif grid_symbol == "|":
             if self.direction == "^":
+                new_x = self.x
                 new_y = self.y - 1
             elif self.direction == "v":
+                new_x = self.x
                 new_y = self.y + 1
-
         # station / reward tile
         elif grid_symbol == "10":
             if self.direction == "^":
+                new_x = self.x
                 new_y = self.y - 1
             elif self.direction == "v":
+                new_x = self.x
                 new_y = self.y + 1
             elif self.direction == "<":
-                self.x -= 1
+                new_x = self.x - 1
+                new_y = self.y
             elif self.direction == ">":
                 new_x = self.x + 1
+                new_y = self.y
             reward = min(10 - self.delay, 10)
 
         # curve left
@@ -235,11 +243,15 @@ class Zug:
 
         reward = 0
 
-        return new_x, new_y, reward
+        return new_x, new_y, reward, self
 
     def move(self, new_x, new_y):
+        self.grid.train_grid[self.y][self.x] = 0
+        self.grid.train_grid[new_y][new_x] = self
+
         self.x = new_x
         self.y = new_y
+
         self.step += 1
 
 
@@ -267,5 +279,5 @@ def step(grid, actions, *args):
 if __name__ == "__main__":
     gridworld = Grid()
     trains = list()
-    for i in range(5):
+    for i in range(50):
         step(gridworld, None)
