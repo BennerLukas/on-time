@@ -15,14 +15,15 @@ class Signal:
 
 class Weiche:
     def __init__(self, alternative, default):
-        self.status = 0
+        self.status = default
         self.status_switched = alternative
+        self.default = default
 
     def change_status(self):
-        if self.status == 0:
-            self.status = self.status_ausschlag
+        if self.status == self.default:
+            self.status = self.status_switched
         else:
-            self.status = 0
+            self.status = self.default
 
 
 class Stop:
@@ -47,32 +48,32 @@ class Grid:
              0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Weiche('/', '|'), '|', 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, '/', '-', Stop(), '-', '-', Stop(), '-', '-', '-', Stop(), '-', '-', '-', '-', '-', '|', '|',
-             Weiche('/', '-'), Signal(), '-', '-', '-', Stop(), '-', '-', '-', '-', '-', '-', 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, '/', '/', '-', Stop(), '-', '-', Stop(), '-', '-', '-', Stop(), '-', '-', '-', '-', '-', '|', '|',
-             '-', '-', '-', '-', '-', Stop(), '-', '-', '-', '-', '-', '-', '\\', 0, 0, 0, 0, 0, 0],
-            [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            [0, 0, 0, '/', '-', '-', Stop(""), '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '|', '|',
+             Weiche('/', '-'), Signal(), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '-', 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, '|', 0, '-', '-', Stop(""), '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '|', '|',
+             '-', '-', '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '-', '\\', 0, 0, 0, 0, 0, 0],
+            [0, 0, '|', '/', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              '\\', '\\', 0, 0, 0, 0, 0],
             [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, '\\', '\\', 0, 0, 0, 0],
             [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, '|', Weiche('/', '|'), Weiche('\\', '-'), Signal(), '-', '-'],  # Ausfahrt Nationaltheater
-            [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Signal(), '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, '|', '|', '-', '-', '-', '-'],  # Ausfahrt Nationaltheater
-            [0, 0, Signal(), '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Weiche, '|', 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            [0, 0, Signal(), '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Signal(), '|', 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, '|', Weiche('/', '|'), 0, 0, 0, 0],
-            ['-', '-', Weiche('\\', '-'), '-', Weiche('\\', '-'), Signal(), '-', Stop(), '-', '-', '-', Stop(), '-',
-             '-', '-', '-', '-', '-', '-', Weiche('\\', '|'), '|', Weiche('\\', '-'), Signal(), '-', Stop(), '-', '-',
-             '-', '-', '-', '-', Stop(), '-', '-', '|', Signal(), 0, 0, 0, 0],  # Ausfahrt Handelshafen
-            ['-', Signal(), '-', '-', '-', '-', '-', Stop(), '-', '-', '-', Stop(), '-', '-', '-', '-', '-', '-',
-             Signal(), '|', '|', '-', '-', '-', Stop(), '-', '-', '-', '-', '-', '-', Stop(), '-', '-', '|',
+            ['-', '-', Weiche('\\', '-'), '-', Weiche('\\', '-'), Signal(), '-', Stop(""), '-', '-', '-', Stop(""), '-',
+             '-', '-', '-', '-', '-', '-', Weiche('\\', '|'), '|', Weiche('\\', '-'), Signal(), '-', Stop(""), '-', '-',
+             '-', '-', '-', '-', Stop(""), '-', '-', '|', Signal(), 0, 0, 0, 0],  # Ausfahrt Handelshafen
+            ['-', Signal(), '-', '-', '-', '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '-',
+             Signal(), '|', '|', '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '-', Stop(""), '-', '-', '|',
              Weiche('\\', '|'), 0, 0, 0, 0],  # Ausfahrt Handelshafen
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', Signal(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, Signal(), Signal(), 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-             Weiche('\\', '|'), Weiche('/', '|'), Weiche('\\', '-'), Signal(), Stop(), '-'],  # Ausfahrt Tattersall
+             Weiche('\\', '|'), Weiche('/', '|'), Weiche('\\', '-'), Signal(), Stop(""), '-'],  # Ausfahrt Tattersall
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-             '|', '|', '-', '-', Stop(), '-'],  # Ausfahrt Tattersall
+             '|', '|', '-', '-', Stop(""), '-'],  # Ausfahrt Tattersall
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              '|', Weiche('/', '|'), 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -82,12 +83,12 @@ class Grid:
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              '/', '|', 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '\\', 0, '\\', '-', '-', Weiche('/', '-'),
-             Signal(), '-', Stop(), '-', '-', '-', '-', '-', Stop(), 0, '|', 0, 0, 0, 0],
+             Signal(), '-', Stop(""), '-', '-', '-', '-', '-', Stop(""), 0, '|', 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '-', Signal(), Weiche('\\', '-'), '-',
-             Weiche('\\', '-'), '-', '-', Stop(), '-', '-', '-', '-', '-', Stop(), '/', 0, 0, 0, 0, 0],
+             Weiche('\\', '-'), '-', '-', Stop(""), '-', '-', '-', '-', '-', Stop(""), '/', 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', Weiche('/', '-'), 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Stop(), Signal(), 0, 0, 0, 0, 0, 0, 0,
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Stop(""), Signal(), 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0]
@@ -174,9 +175,35 @@ class Grid:
             if self.switch_grid[i.get("x")][i.get("y")].status != i.get("status"):
                 self.switch_grid[i.get("x")][i.get("y")] = self.switch_grid[i.get("x")][i.get("y")].change_status
 
+    def __str__(self):
+        output = ""
+        for y, row in enumerate(self.grid):
+            for x, col in enumerate(row):
+                if self.train_grid[y][x] == 0:
+                    if col == 0:
+                        output += "  "
+                    elif col in ["-", "|", "/"]:
+                        output += 2*col
+                    elif col == "\\":
+                        output += col*2
+                    elif type(col) == Signal:
+                        output += "S" + str(col.status)
+                    elif type(col) == Weiche:
+                        output += "W" + col.status_switched
+                        # if len(col.status) != 2:
+                        #     output += 2*col.status
+                        # else:
+                        #     output += col.status
+                    elif type(col) == Stop:
+                        output += "SP" #col.name[:2]
+                else:
+                    output += "<" + str(self.train_grid[y][x].line_number)
+            output += "\n"
+        return output
+
 
 class Zug:
-    def __init__(self, start_x: int, start_y: int, direction: str, grid: Grid, stops: list[str], delay: int = 0):
+    def __init__(self, start_x: int, start_y: int, direction: str, line: int, grid: Grid, stops: list[str], delay: int = 0):
         """
         :param start_x:
         :param start_y:
@@ -193,6 +220,7 @@ class Zug:
         self.delay = delay
         self.step = self.grid.add_train_to_grid(self.x, self.y, self)
         self.stops = stops
+        self.line_number = line
 
     def read_track(self):
 
@@ -203,7 +231,7 @@ class Zug:
         elif type(grid_symbol) == Signal:
             grid_symbol = grid_symbol.status
         elif type(grid_symbol) == Stop:
-            grid_symbol == "10"
+            grid_symbol = "10"
         # left / right horizontal
         if grid_symbol == "-":
             if self.direction == "<":
@@ -248,7 +276,6 @@ class Zug:
             elif self.direction == ">":
                 new_x = self.x + 1
                 new_y = self.y
-            reward = min(10 - self.delay, 10)
 
         # curve left
         elif grid_symbol == "/":
@@ -280,7 +307,27 @@ class Zug:
                 new_x = self.x + 1
                 new_y = self.y + 1
 
-        reward = 0
+        elif grid_symbol == 1: # Signal == rot
+            new_x = self.x
+            new_y = self.y
+            self.delay += 0.5
+        elif grid_symbol == 0: # Signal == grün
+            if self.direction == "^":
+                new_x = self.x
+                new_y = self.y - 1
+            elif self.direction == "v":
+                new_x = self.x
+                new_y = self.y + 1
+            elif self.direction == "<":
+                new_x = self.x - 1
+                new_y = self.y
+            elif self.direction == ">":
+                new_x = self.x + 1
+                new_y = self.y
+
+
+
+        reward = min(round(10 - self.delay**1.5, 1), 10) if grid_symbol == "10" else 0
 
         return new_x, new_y, reward, self
 
@@ -299,19 +346,18 @@ def create_line(line_number: int, reverse: bool, grid: Grid):
     if line_number == 1:
         stops = ["T", "B", "U", "P", "M", "A"]
         if reverse is False:
-            line = Zug(start_x=39, start_y=12, direction="<", grid=grid, stops=stops, delay=delay)
+            line = Zug(start_x=39, start_y=13, direction="<", grid=grid, stops=stops, delay=delay, line=1)
         else:
-            line = Zug(start_x=19, start_y=0, direction="v", grid=grid, stops=stops, delay=delay)
+            line = Zug(start_x=19, start_y=0, direction="v", grid=grid, stops=stops, delay=delay, line=1)
     return line
 
 
 def step(grid, actions, *args):
-    if grid.step % 10 == 1:
+    if grid.step % 10 == 0:
         trains.append(create_line(1, False, grid))
     reward = grid.update_world()
     print(f"Step: {grid.step}, {reward}")
-    for i in grid.train_grid:
-        print(i)
+    print(grid)
     return grid.grid, reward, False
 
 
