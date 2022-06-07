@@ -48,9 +48,11 @@ class Grid:
              0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Weiche('/', '|'), '|', 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, '/', '-', '-', Stop(""), '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '|', '|',
+            [0, 0, 0, '/', '-', '-', Stop(""), '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-',
+             '|', '|',
              Weiche('/', '-'), Signal(), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '-', 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, '|', 0, '-', '-', Stop(""), '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '|', '|',
+            [0, 0, '|', 0, '-', '-', Stop(""), '-', '-', Stop(""), '-', '-', '-', Stop(""), '-', '-', '-', '-', '-',
+             '|', '|',
              '-', '-', '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '-', '\\', 0, 0, 0, 0, 0, 0],
             [0, 0, '|', '/', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              '\\', '\\', 0, 0, 0, 0, 0],
@@ -88,7 +90,8 @@ class Grid:
              Weiche('\\', '-'), '-', '-', Stop(""), '-', '-', '-', '-', '-', Stop(""), '/', 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', Weiche('/', '-'), 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Stop(""), Signal(), 0, 0, 0, 0, 0, 0, 0,
+            [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, Stop(""), Signal(), 0, 0, 0, 0, 0, 0,
+             0,
              0, 0, 0, 0, 0, 0, 0, 0],
             [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, 0, 0, 0, 0, 0]
@@ -170,10 +173,20 @@ class Grid:
                     reward = 0 + self.update_train(tile.read_track())
         return reward
 
-    def change_world_state(self, action_list):
-        for i in action_list:
-            if self.switch_grid[i.get("x")][i.get("y")].status != i.get("status"):
-                self.switch_grid[i.get("x")][i.get("y")] = self.switch_grid[i.get("x")][i.get("y")].change_status
+    def update_signal_switches(self, action_list):
+        amount_switches = 0
+        amount_signals = 0
+
+        for row in self.grid:
+            for item in row:
+                if type(item) == Signal:
+                    if action_list[amount_signals] == 1:
+                        item.change_status()
+                    amount_signals += 1
+                elif type(item) == Weiche:
+                    if action_list[16 + amount_switches] == 1:
+                        item.change_status()
+                    amount_switches += 1
 
     def __str__(self):
         output = ""
@@ -183,9 +196,9 @@ class Grid:
                     if col == 0:
                         output += "  "
                     elif col in ["-", "|", "/"]:
-                        output += 2*col
+                        output += 2 * col
                     elif col == "\\":
-                        output += col*2
+                        output += col * 2
                     elif type(col) == Signal:
                         output += "S" + str(col.status)
                     elif type(col) == Weiche:
@@ -195,7 +208,7 @@ class Grid:
                         # else:
                         #     output += col.status
                     elif type(col) == Stop:
-                        output += "SP" #col.name[:2]
+                        output += "SP"  # col.name[:2]
                 else:
                     output += "<" + str(self.train_grid[y][x].line_number)
             output += "\n"
@@ -203,7 +216,8 @@ class Grid:
 
 
 class Zug:
-    def __init__(self, start_x: int, start_y: int, direction: str, line: int, grid: Grid, stops: list[str], delay: int = 0):
+    def __init__(self, start_x: int, start_y: int, direction: str, line: int, grid: Grid, stops: list[str],
+                 delay: int = 0):
         """
         :param start_x:
         :param start_y:
@@ -307,11 +321,11 @@ class Zug:
                 new_x = self.x + 1
                 new_y = self.y + 1
 
-        elif grid_symbol == 1: # Signal == rot
+        elif grid_symbol == 1:  # Signal == rot
             new_x = self.x
             new_y = self.y
             self.delay += 0.5
-        elif grid_symbol == 0: # Signal == grün
+        elif grid_symbol == 0:  # Signal == grün
             if self.direction == "^":
                 new_x = self.x
                 new_y = self.y - 1
@@ -325,9 +339,7 @@ class Zug:
                 new_x = self.x + 1
                 new_y = self.y
 
-
-
-        reward = min(round(10 - self.delay**1.5, 1), 10) if grid_symbol == "10" else 0
+        reward = min(round(10 - self.delay ** 1.5, 1), 10) if grid_symbol == "10" else 0
 
         return new_x, new_y, reward, self
 
@@ -358,11 +370,12 @@ def step(grid, actions, *args):
     reward = grid.update_world()
     print(f"Step: {grid.step}, {reward}")
     print(grid)
+    grid.update_signal_switches()
     return grid.grid, reward, False
 
 
 if __name__ == "__main__":
     gridworld = Grid()
     trains = list()
-    for i in range(50):
+    for i in range(1):
         step(gridworld, None)
