@@ -53,8 +53,16 @@ class Grid(gym.Env, ABC):
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
         # TODO: Convert Actions to Signal-Changes
         # TODO: Create Observation from self.grid
+        self._add_lines()
         reward = self._update_world()
-        pass
+        obs_state = self._convert_to_observation_space()
+        if self.step > 400:
+            done = True
+        else:
+            done = False
+        avrg_delay = self._return_average_delay()
+
+        return obs_state, reward, done, avrg_delay
 
     def reset(
             self,
@@ -65,7 +73,8 @@ class Grid(gym.Env, ABC):
     ) -> Union[ObsType, tuple[ObsType, dict]]:
         # TODO: Call Conversion for Observation
         self._init_grid()
-        pass
+        obs_state = self._convert_to_observation_space()
+        return obs_state
 
     def render(self, mode='human', close=False):
         # Render the environment to the screen
@@ -83,6 +92,19 @@ class Grid(gym.Env, ABC):
         """
         self.train_grid[y][x] = train
         return self.step
+
+    def _return_average_delay(self):
+        delay = 0
+        amount_trains = 0
+        for row in self.train_grid:
+            for col in row:
+                if type(col) == Train:
+                    delay += col.delay
+                    amount_trains += 1
+
+        delay = (delay / amount_trains) if amount_trains else 0
+
+        return {"average_delay": delay}
 
     def _convert_to_observation_space(self):
         # Get delays at signal cluster 1 (Kurpfalzbrücke)
@@ -393,35 +415,72 @@ class Grid(gym.Env, ABC):
                     reward = 0 + self._update_train(tile.read_track())
         return reward
 
-    def _update_signal_switches(self, action_list):
+    def _update_signal(self, action_list):
         """
-        Uses a list of 0 and 1s to switch the respective signal or switch. The list is split by index: The first half
-        is used for signals and the second half is used for switches. In the default grid there are 18 signals and 18
-        switches.
-        :param action_list: list of 36 binary integers
+
+        :param action_list: list of 7 integers
         :return:
         """
-        amount_switches = 0
-        amount_signals = 0
+        # Get delays at signal cluster 1 (Kurpfalzbrücke)
+        # Northern signal
+        delay1 = self.grid[0][19].delay
+        # Southern signal
+        delay2 = self.grid[7][20].delay
+        # Western signal
+        delay3 = self.grid[4][17].delay
+        # Eastern signal
+        delay4 = self.grid[3][21].delay
 
-        # iterate over all rows in the grid
-        for row in self.grid:
-            # iterate over all items in the row
-            for item in row:
-                # if the item is a signal
-                if type(item) == Signal:
-                    # check if it's supposed to be changed
-                    if action_list[amount_signals] == 1:
-                        # change the item's status
-                        item.change_status()
-                    amount_signals += 1
-                # if the item is a switch
-                elif type(item) == Switch:
-                    # check if it's supposed to be changed
-                    if action_list[16 + amount_switches] == 1:
-                        # change the item's status
-                        item.change_status()
-                    amount_switches += 1
+        # Get delays at signal cluster 2 (Paradeplatz)
+        # Northern Signal
+        delay1 = self.grid[9][19].delay
+        # Southern signal
+        delay2 = self.grid[7][20].delay
+        # Western signal
+        delay3 = self.grid[4][18].delay
+        # Eastern signal
+        delay4 = self.grid[3][22].delay
+
+        # Get delays at signal cluster 3 (Handelshafen)
+        # Northern Signal
+        delay1 = self.grid[9][2].delay
+        # Western signal
+        delay2 = self.grid[11][1].delay
+        # Eastern signal
+        delay3 = self.grid[10][5].delay
+
+        # Get delays at signal cluster 4 (Nationaltheater)
+        # Northern Signal
+        delay1 = self.grid[6][32].delay
+        # Southern signal
+        delay2 = self.grid[10][33].delay
+        # Eastern signal
+        delay3 = self.grid[7][35].delay
+
+        # Get delays at signal cluster 5 (Tattersall)
+        # Northern Signal
+        delay1 = self.grid[12][32].delay
+        # Southern signal
+        delay2 = self.grid[16][33].delay
+        # Eastern signal
+        delay3 = self.grid[13][35].delay
+
+        # Get delays at signal cluster 6 (Konrad-Adenauer-Brücke)
+        # Southern signal
+        delay1 = self.grid[22][23].delay
+        # Western signal
+        delay2 = self.grid[20][20].delay
+        # Eastern signal
+        delay3 = self.grid[19][24].delay
+
+        # Get delays at signal cluster 7 (Wasserturm)
+        # Southern signal
+        self.grid[12][34]
+        # Western signal
+        self.grid[20][32]
+
+        return None
+
 
     def _create_line(self, line_number: int, reverse: bool):
         """
@@ -499,6 +558,34 @@ class Grid(gym.Env, ABC):
 
         return line
 
+    def _add_lines(self):
+        if self.step % 20 == 0:
+            pass
+    
+        elif self.step % 20 == 1:
+            self._create_line(6, False)
+    
+        elif self.step % 20 == 2:
+            self._create_line(4, False)
+            self._create_line(4, True)
+    
+        elif self.step % 20 == 3:
+            self._create_line(1, True)
+    
+        elif self.step % 20 == 4:
+            self._create_line(1, False)
+        
+        elif self.step % 20 == 5:
+            self._create_line(5, True)
+        
+        elif self.step % 20 == 8:
+            self._create_line(2, True)
+            self._create_line(7, True)
+    
+        elif self.step % 20 == 9:
+            self._create_line(6, True)
+            self._create_line(5, False)
+            
     def __str__(self):
         """
         Alternative print function to enable a proper view into the grid world.
@@ -529,36 +616,6 @@ class Grid(gym.Env, ABC):
             output += "\n"
         return output
 
-
-def step(grid, actions, *args):
-    if grid.step % 10 == 0:
-        pass
-
-    elif grid.step % 10 == 1:
-        trains.append(create_line(6, False, grid))
-
-    elif grid.step % 120 == 2:
-        trains.append(create_line(4, False, grid))
-        trains.append(create_line(4, True, grid))
-
-    elif grid.step % 120 == 3:
-        trains.append(create_line(1, True, grid))
-
-    elif grid.step % 120 == 4:
-        trains.append(create_line(1, False, grid))
-
-    elif grid.step % 10 == 8:
-        trains.append(create_line(2, True, grid))
-        trains.append(create_line(7, True, grid))
-
-    elif grid.step % 10 == 9:
-        trains.append(create_line(6, True, grid))
-
-    reward = grid._update_world()
-    print(f"Step: {grid.step}, {reward}")
-    print(grid)
-    # grid.update_signal_switches()
-    return grid.grid, reward, False
 
 
 if __name__ == "__main__":
