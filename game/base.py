@@ -5,6 +5,7 @@ from collections import deque
 from typing import Tuple, Union, Optional
 
 import gym
+import numpy as np
 from gym import spaces
 from gym.core import ObsType, ActType
 
@@ -25,12 +26,29 @@ class Grid(gym.Env, ABC):
         initial value.
         """
         super(Grid, self).__init__()
+        # Grid components
         self.grid = None
         self.train_grid = None
         self.step = 0
         self._init_grid()
-        self.action_space = spaces.MultiDiscrete()
-        self.observation_space = spaces.MultiDiscrete
+
+        # Gym specific variables
+        self.state = dict
+        self.action_space = spaces.MultiDiscrete([5, 5, 4, 4, 4, 4, 3])
+        self.observation_space = spaces.Dict({"signal_cluster_kubruecke": spaces.Box(low=-2, high=20,
+                                                                                     shape=(4,), dtype=np.float32),
+                                              "signal_cluster_paradeplatz": spaces.Box(low=-2, high=20,
+                                                                                       shape=(4,), dtype=np.float32),
+                                              "signal_cluster_handelshafen": spaces.Box(low=-2, high=20,
+                                                                                        shape=(3,), dtype=np.float32),
+                                              "signal_cluster_nationaltheater": spaces.Box(low=-2, high=20,
+                                                                                           shape=(3,),dtype=np.float32),
+                                              "signal_cluster_tattersall": spaces.Box(low=-2, high=20,
+                                                                                      shape=(3,), dtype=np.float32),
+                                              "signal_cluster_kabruecke": spaces.Box(low=-2, high=20,
+                                                                                     shape=(3,), dtype=np.float32),
+                                              "signal_cluster_wasserturm": spaces.Box(low=-2, high=20,
+                                                                                      shape=(2,), dtype=np.float32)})
 
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
         # TODO: Convert Actions to Signal-Changes
@@ -53,6 +71,151 @@ class Grid(gym.Env, ABC):
         # Render the environment to the screen
         # TODO @Paula für Idee wie ich es erzeuge siehe unten __str__
         pass
+
+    def add_train_to_grid(self, x: int, y: int, train: Train):
+        """
+        Adds a train based on initial coordinates into the world by adding it to the train_grid. It has no logic to check
+        if a train already occupies the coordinate.
+        :param x: integer between 0 and the length of a grid row
+        :param y: integer between 0 and the height of the grid
+        :param train: train object that is to be placed
+        :return: current grid step
+        """
+        self.train_grid[y][x] = train
+        return self.step
+
+    def _convert_to_observation_space(self):
+        # Get delays at signal cluster 1 (Kurpfalzbrücke)
+        # Northern signal
+        if type(self.train_grid[0][19]) == Train:
+            delay1 = self.train_grid[0][19].delay
+        else:
+            delay1 = None
+        # Southern signal
+        if type(self.train_grid[7][20]) == Train:
+            delay2 = self.train_grid[7][20].delay
+        else:
+            delay2 = None
+        # Western signal
+        if type(self.train_grid[4][17]) == Train:
+            delay3 = self.train_grid[4][17].delay
+        else:
+            delay3 = None
+        # Eastern signal
+        if type(self.train_grid[3][21]) == Train:
+            delay4 = self.train_grid[3][21].delay
+        else:
+            delay4 = None
+        self.state["signal_cluster_kubruecke"] = np.array([delay1, delay2, delay3, delay4], dtype=np.float32)
+
+        # Get delays at signal cluster 2 (Paradeplatz)
+        # Northern Signal
+        if type(self.train_grid[8][19]) == Train:
+            delay1 = self.train_grid[9][19].delay
+        else:
+            delay1 = None
+        # Southern signal
+        if type(self.train_grid[12][20]) == Train:
+            delay2 = self.train_grid[7][20].delay
+        else:
+            delay2 = None
+        # Western signal
+        if type(self.train_grid[11][18]) == Train:
+            delay3 = self.train_grid[4][18].delay
+        else:
+            delay3 = None
+        # Eastern signal
+        if type(self.train_grid[10][22]) == Train:
+            delay4 = self.train_grid[3][22].delay
+        else:
+            delay4 = None
+        self.state["signal_cluster_paradeplatz"] = np.array([delay1, delay2, delay3, delay4], dtype=np.float32)
+
+        # Get delays at signal cluster 3 (Handelshafen)
+        # Northern Signal
+        if type(self.train_grid[9][2]) == Train:
+            delay1 = self.train_grid[9][2].delay
+        else:
+            delay1 = None
+        # Western signal
+        if type(self.train_grid[11][1]) == Train:
+            delay2 = self.train_grid[11][1].delay
+        else:
+            delay2 = None
+        # Eastern signal
+        if type(self.train_grid[10][5]) == Train:
+            delay3 = self.train_grid[10][5].delay
+        else:
+            delay3 = None
+        self.state["signal_cluster_handelshafen"] = np.array([delay1, delay2, delay3], dtype=np.float32)
+
+        # Get delays at signal cluster 4 (Nationaltheater)
+        # Northern Signal
+        if type(self.train_grid[6][32]) == Train:
+            delay1 = self.train_grid[6][32].delay
+        else:
+            delay1 = None
+        # Southern signal
+        if type(self.train_grid[10][33]) == Train:
+            delay2 = self.train_grid[10][33].delay
+        else:
+            delay2 = None
+        # Eastern signal
+        if type(self.train_grid[7][35]) == Train:
+            delay3 = self.train_grid[7][35].delay
+        else:
+            delay3 = None
+        self.state["signal_cluster_nationaltheater"] = np.array([delay1, delay2, delay3], dtype=np.float32)
+
+        # Get delays at signal cluster 5 (Tattersall)
+        # Northern Signal
+        if type(self.train_grid[12][32]) == Train:
+            delay1 = self.train_grid[12][32].delay
+        else:
+            delay1 = None
+        # Southern signal
+        if type(self.train_grid[16][33]) == Train:
+            delay2 = self.train_grid[16][33].delay
+        else:
+            delay2 = None
+        # Eastern signal
+        if type(self.train_grid[13][35]) == Train:
+            delay3 = self.train_grid[13][35].delay
+        else:
+            delay3 = None
+        self.state["signal_cluster_tattersall"] = np.array([delay1, delay2, delay3], dtype=np.float32)
+
+        # Get delays at signal cluster 6 (Konrad-Adenauer-Brücke)
+        # Southern signal
+        if type(self.train_grid[22][23]) == Train:
+            delay1 = self.train_grid[22][23].delay
+        else:
+            delay1 = None
+        # Western signal
+        if type(self.train_grid[20][20]) == Train:
+            delay2 = self.train_grid[20][20].delay
+        else:
+            delay2 = None
+        # Eastern signal
+        if type(self.train_grid[19][24]) == Train:
+            delay3 = self.train_grid[19][24].delay
+        else:
+            delay3 = None
+        self.state["signal_cluster_kabruecke"] = np.array([delay1, delay2, delay3], dtype=np.float32)
+
+        # Get delays at signal cluster 7 (Wasserturm)
+        # Southern signal
+        if type(self.train_grid[12][34]) == Train:
+            delay1 = self.train_grid[12][34].delay
+        else:
+            delay1 = None
+        # Western signal
+        if type(self.train_grid[20][32]) == Train:
+            delay2 = self.train_grid[20][32].delay
+        else:
+            delay2 = None
+        self.state["signal_cluster_wasserturm"] = np.array([delay1, delay2], dtype=np.float32)
+        return self.state
 
     def _init_grid(self):
         """
@@ -178,18 +341,6 @@ class Grid(gym.Env, ABC):
              0, 0, 0, 0]
         ]
 
-    def add_train_to_grid(self, x: int, y: int, train: Train):
-        """
-        Adds a train based on initial coordinates into the world by adding it to the train_grid. It has no logic to check
-        if a train already occupies the coordinate.
-        :param x: integer between 0 and the length of a grid row
-        :param y: integer between 0 and the height of the grid
-        :param train: train object that is to be placed
-        :return: current grid step
-        """
-        self.train_grid[y][x] = train
-        return self.step
-
     def _update_train(self, *args):
         """
         Recursive function to update all subsequent trains. It checks if there is a train object on the proposed new
@@ -272,36 +423,6 @@ class Grid(gym.Env, ABC):
                         item.change_status()
                     amount_switches += 1
 
-    def __str__(self):
-        """
-        Alternative print function to enable a proper view into the grid world.
-        :return: fancy output string
-        """
-        output = ""
-        # iterate over all rows
-        for y, row in enumerate(self.grid):
-            # iterate over all elements in the row
-            for x, col in enumerate(row):
-                # if there is no train on the grid coordinate look into the normal grid
-                if self.train_grid[y][x] == 0:
-                    if col == 0:
-                        output += "  "
-                    elif col in ["-", "|", "/"]:
-                        output += 2 * col
-                    elif col == "\\":
-                        output += col * 2
-                    elif type(col) == Signal:
-                        output += "S" + str(col.status)
-                    elif type(col) == Switch:
-                        output += "W" + col.status_switched
-                    elif type(col) == Stop:
-                        output += "SP"  # col.name[:2]
-                # if there is a train on this grid coordinate print the train instead
-                else:
-                    output += str(self.train_grid[y][x].line_number) + self.train_grid[y][x].direction
-            output += "\n"
-        return output
-
     def _create_line(self, line_number: int, reverse: bool):
         """
         Creates a train line based on the line number and its tracking direction.
@@ -377,6 +498,36 @@ class Grid(gym.Env, ABC):
             raise NotImplemented("Line number is not implemented! Only lines 1,2,4,5,6,7 are implemented.")
 
         return line
+
+    def __str__(self):
+        """
+        Alternative print function to enable a proper view into the grid world.
+        :return: fancy output string
+        """
+        output = ""
+        # iterate over all rows
+        for y, row in enumerate(self.grid):
+            # iterate over all elements in the row
+            for x, col in enumerate(row):
+                # if there is no train on the grid coordinate look into the normal grid
+                if self.train_grid[y][x] == 0:
+                    if col == 0:
+                        output += "  "
+                    elif col in ["-", "|", "/"]:
+                        output += 2 * col
+                    elif col == "\\":
+                        output += col * 2
+                    elif type(col) == Signal:
+                        output += "S" + str(col.status)
+                    elif type(col) == Switch:
+                        output += "W" + col.status_switched
+                    elif type(col) == Stop:
+                        output += "SP"  # col.name[:2]
+                # if there is a train on this grid coordinate print the train instead
+                else:
+                    output += str(self.train_grid[y][x].line_number) + self.train_grid[y][x].direction
+            output += "\n"
+        return output
 
 
 def step(grid, actions, *args):
