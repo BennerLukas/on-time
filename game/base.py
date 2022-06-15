@@ -1,234 +1,22 @@
 import random
 import time
+from abc import ABC
 from collections import deque
+from typing import Tuple, Union, Optional
+
+import gym
+from gym import spaces
+from gym.core import ObsType, ActType
+
+from helper import Switch, Signal, Stop
+from train import Train
 import sys
 
 
 # TODO: Signal-Cluster (Kreuzungen) --> Observation Space: Signal-Cluster 1: {1: 5, 2: -1, 3: None}
 #                                      Action Space: Signal-Cluster 1: [1,2] => 1: Signal oben grün, Signal rechts rot
-# TODO: Maybe fancier console update
 
-
-class Signal:
-    """A signal allows the train to be stopped on the current segment for ordering and preventing crashes."""
-
-    def __init__(self):
-        """
-        Defines the default state of a signal as being red
-        """
-        self.status = 0
-
-    def change_status(self):
-        """
-        Switches the status of the signal between on (1 = red light) and off (0 = green light)
-        :return:
-        """
-        if self.status == 1:
-            self.status = 0
-        else:
-            self.status = 1
-
-
-class Switch:
-    """A switch that replaces a track segment and allows the train to move in different directions."""
-
-    def __init__(self, alternative: str, default: str):
-        """
-        Initializes a switch that has two states. The default state is given by what the track would be if no switching
-        would be allowed i.e. straight. The alternative state is always a directional state i.e. diagonally up and right.
-        :param alternative:
-        :param default:
-        """
-        self.status = default
-        self.status_switched = alternative
-        self.default = default
-
-    def change_status(self, status_updated):
-        """
-        Switches Status between the default state and the activated state
-        :param status_updated: new state for switch, is validated against base values
-        :return: None
-        """
-        if status_updated not in [self.default, self.status_switched]:
-            raise Exception(f"Switch forced to switch to wrong status! Was given {status_updated} but can only accept "
-                            f"{self.default, self.status_switched}")
-        self.status = status_updated
-
-
-class Stop:
-    """A stop is defined as a station on the network."""
-
-    def __init__(self, name: str):
-        """
-        Initializes the stop with a given name. The name can be used in downstream task to check if a train should be
-        there.
-        :param name:
-        """
-        self.name = name
-
-
-class Train:
-    def __init__(self, start_x: int, start_y: int, direction: str, line: int, grid, switches: list[str],
-                 delay: int = 0):
-        """
-        :param start_x:
-        :param start_y:
-        :param direction:
-        :param grid:
-        :param stops:
-        :param delay:
-        :return:
-        """
-        self.x = start_x
-        self.y = start_y
-        self.direction = direction
-        self.grid = grid
-        self.delay = delay
-        self.step = self.grid.add_train_to_grid(self.x, self.y, self)
-        self.switches = switches
-        self.line_number = line
-
-    def read_track(self):
-
-        grid_symbol = self.grid.grid[self.y][self.x]
-
-        if type(grid_symbol) == Switch:
-            grid_symbol.change_status(self.switches.popleft())
-            print(self.y, self.x)
-            grid_symbol = grid_symbol.status
-        elif type(grid_symbol) == Signal:
-            grid_symbol = grid_symbol.status
-        elif type(grid_symbol) == Stop:
-            grid_symbol = "10"
-
-        # left / right horizontal
-        if grid_symbol == "-":
-            if self.direction == "<":
-                new_x = self.x - 1
-                new_y = self.y
-            elif self.direction == ">":
-                new_x = self.x + 1
-                new_y = self.y
-            elif self.direction == "^":
-                new_x = self.x
-                new_y = self.y - 1
-            elif self.direction == "v":
-                new_x = self.x
-                new_y = self.y + 1
-            direction = self.direction
-
-        # up / down vertical
-        elif grid_symbol == "|":
-            if self.direction == "^":
-                new_x = self.x
-                new_y = self.y - 1
-            elif self.direction == "v":
-                new_x = self.x
-                new_y = self.y + 1
-            elif self.direction == ">":
-                new_x = self.x + 1
-                new_y = self.y
-            elif self.direction == "<":
-                new_x = self.x - 1
-                new_y = self.y
-            direction = self.direction
-
-        # station / reward tile
-        elif grid_symbol == "10":
-            if self.direction == "^":
-                new_x = self.x
-                new_y = self.y - 1
-            elif self.direction == "v":
-                new_x = self.x
-                new_y = self.y + 1
-            elif self.direction == "<":
-                new_x = self.x - 1
-                new_y = self.y
-            elif self.direction == ">":
-                new_x = self.x + 1
-                new_y = self.y
-            self.delay += random.randint(0, 2)
-            direction = self.direction
-
-        # curve left
-        elif grid_symbol == "/":
-            if self.direction == "<":
-                new_x = self.x - 1
-                new_y = self.y + 1
-                direction = "v"
-            elif self.direction == ">":
-                new_x = self.x + 1
-                new_y = self.y - 1
-                direction = "^"
-            elif self.direction == "^":
-                new_x = self.x + 1
-                new_y = self.y - 1
-                direction = ">"
-            elif self.direction == "v":
-                new_x = self.x - 1
-                new_y = self.y + 1
-                direction = "<"
-
-        # curve right
-        elif grid_symbol == "\\":
-            if self.direction == "<":
-                new_x = self.x - 1
-                new_y = self.y - 1
-                direction = "^"
-            elif self.direction == ">":
-                new_x = self.x + 1
-                new_y = self.y + 1
-                direction = "v"
-            elif self.direction == "^":
-                new_x = self.x - 1
-                new_y = self.y - 1
-                direction = "<"
-            elif self.direction == "v":
-                new_x = self.x + 1
-                new_y = self.y + 1
-                direction = ">"
-
-        elif grid_symbol == 1:  # Signal == rot
-            new_x = self.x
-            new_y = self.y
-            self.delay += 1
-            direction = self.direction
-        elif grid_symbol == 0:  # Signal == grün
-            if self.direction == "^":
-                new_x = self.x
-                new_y = self.y - 1
-            elif self.direction == "v":
-                new_x = self.x
-                new_y = self.y + 1
-            elif self.direction == "<":
-                new_x = self.x - 1
-                new_y = self.y
-            elif self.direction == ">":
-                new_x = self.x + 1
-                new_y = self.y
-            direction = self.direction
-
-        if grid_symbol == "10":
-            reward = min(round(10 - (abs(1 / 3 * self.delay ** 3) + abs(5 / 8 * self.delay)), 1), 10)
-        else:
-            reward = 0
-
-        return new_x, new_y, direction, reward, self
-
-    def move(self, new_x, new_y, new_direction):
-        self.grid.train_grid[self.y][self.x] = 0
-        self.grid.train_grid[new_y][new_x] = self
-
-        self.x = new_x
-        self.y = new_y
-        self.direction = new_direction
-
-        print(f"Train {self.line_number} \n From {new_x} | {new_y} to {self.x} | {self.y}")
-
-        self.step += 1
-
-
-class Grid:
+class Grid(gym.Env, ABC):
     """The schematic of Mannheim's central metro system. It is simplified into a gridworld and slightly altered."""
 
     def __init__(self):
@@ -236,12 +24,37 @@ class Grid:
         Initializes all grid components with automatically generated components. Also sets the world steps to 0 as
         initial value.
         """
+        super(Grid, self).__init__()
         self.grid = None
         self.train_grid = None
         self.step = 0
-        self.init_grid()
+        self._init_grid()
+        self.action_space = spaces.MultiDiscrete()
+        self.observation_space = spaces.MultiDiscrete
 
-    def init_grid(self):
+    def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
+        # TODO: Convert Actions to Signal-Changes
+        # TODO: Create Observation from self.grid
+        reward = self._update_world()
+        pass
+
+    def reset(
+            self,
+            *,
+            seed: Optional[int] = None,
+            return_info: bool = False,
+            options: Optional[dict] = None,
+    ) -> Union[ObsType, tuple[ObsType, dict]]:
+        # TODO: Call Conversion for Observation
+        self._init_grid()
+        pass
+
+    def render(self, mode='human', close=False):
+        # Render the environment to the screen
+        # TODO @Paula für Idee wie ich es erzeuge siehe unten __str__
+        pass
+
+    def _init_grid(self):
         """
         Sets all grids to their respective default.
 
@@ -272,11 +85,9 @@ class Grid:
              Switch('/', '-'), '|', '|', '-', '-', '-', '-', '-', Stop(""), '-', '-', '-', '-', '-', '\\', '\\',
              0, 0, 0, 0, 0, 0],
             [0, 0, '|', '/', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', Switch("/", "|"), 0, 0, 0, 0, 0, 0, 0, 0,
-             0, 0, 0, 0,
-             '\\', '\\', 0, 0, 0, 0, 0],
+             0, 0, 0, 0, '\\', '\\', 0, 0, 0, 0, 0],
             [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', Signal(), 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-             0, 0,
-             0, Signal, '\\', 0, 0, 0, 0],
+             0, 0, 0, Signal(), '\\', 0, 0, 0, 0],
             [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
              0, Switch('\\', '|'), Switch('/', '|'), Switch('\\', '-'), Signal(), '-', '-'],  # Ausfahrt Nationaltheater
             [0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, '|', '|', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -379,7 +190,7 @@ class Grid:
         self.train_grid[y][x] = train
         return self.step
 
-    def update_train(self, *args):
+    def _update_train(self, *args):
         """
         Recursive function to update all subsequent trains. It checks if there is a train object on the proposed new
         coordinate, and it already moved on this grid step. If it hasn't moved the function update_train is called for
@@ -410,7 +221,7 @@ class Grid:
         # Condition 1: Train on new position that hasn't moved on this step
         if type(expected_new_tile) == Train and expected_new_tile.step != self.step:
             # recursive call for the train on new position
-            reward += self.update_train(expected_new_tile)
+            reward += self._update_train(expected_new_tile)
             # move the original out of recursion train
             expected_new_tile.move(new_x, new_y, new_direction)
             return reward
@@ -422,16 +233,16 @@ class Grid:
             tile.move(new_x, new_y, new_direction)
             return reward + 0
 
-    def update_world(self):
+    def _update_world(self):
         self.step += 1
         reward = 0
         for row in self.train_grid:
             for tile in row:
                 if type(tile) == Train and tile.step != self.step:
-                    reward = 0 + self.update_train(tile.read_track())
+                    reward = 0 + self._update_train(tile.read_track())
         return reward
 
-    def update_signal_switches(self, action_list):
+    def _update_signal_switches(self, action_list):
         """
         Uses a list of 0 and 1s to switch the respective signal or switch. The list is split by index: The first half
         is used for signals and the second half is used for switches. In the default grid there are 18 signals and 18
@@ -491,82 +302,81 @@ class Grid:
             output += "\n"
         return output
 
+    def _create_line(self, line_number: int, reverse: bool):
+        """
+        Creates a train line based on the line number and its tracking direction.
+        :param line_number:
+        :param reverse:
+        :param grid:
+        :return:
+        """
+        delay = random.randint(-3, 3)
+        if line_number == 1:
+            if reverse is False:
+                # from TAT
+                switches = deque(["-", "/", "-", "|", "|"])
+                line = Train(start_x=39, start_y=13, direction="<", grid=self, switches=switches, delay=delay, line=1)
+            else:
+                # from KUB
+                switches = deque(["|", "|", "-", "-", "/"])
+                line = Train(start_x=19, start_y=0, direction="v", grid=self, switches=switches, delay=delay, line=1)
 
-def create_line(line_number: int, reverse: bool, grid: Grid):
-    """
-    Creates a train line based on the line number and its tracking direction.
-    :param line_number:
-    :param reverse:
-    :param grid:
-    :return:
-    """
-    delay = random.randint(-3, 3)
-    if line_number == 1:
-        if reverse is False:
-            # from TAT
-            switches = deque(["-", "/", "-", "|", "|"])
-            line = Train(start_x=39, start_y=13, direction="<", grid=grid, switches=switches, delay=delay, line=1)
+        elif line_number == 2:
+            if reverse is False:
+                # from NAT
+                switches = deque(["-", "/", "/", "-", "-", "\\", "/"])
+                line = Train(start_x=39, start_y=8, direction="<", grid=self, switches=switches, delay=delay, line=2)
+            else:
+                # from KUB
+                switches = deque(["/", "\\", "-", "/", "/"])
+                line = Train(start_x=19, start_y=0, direction="v", grid=self, switches=switches, delay=delay, line=2)
+
+        # Line 3 skipped because of grid architecture
+
+        elif line_number == 4:
+            if reverse is False:
+                # from KAB
+                switches = deque(["/", "|", "|", "\\", "\\", "|", "|"])
+                line = Train(start_x=24, start_y=23, direction="^", grid=self, switches=switches, delay=delay, line=4)
+            else:
+                # from KUB
+                switches = deque(["|", "|", "\\"])
+                line = Train(start_x=19, start_y=0, direction="v", grid=self, switches=switches, delay=delay, line=4)
+
+        elif line_number == 5:
+            if reverse is False:
+                # from KUB
+                switches = deque(["|", "|", "|", "-", "-", "|", "|", "|", "/"])
+                line = Train(start_x=19, start_y=0, direction="v", grid=self, switches=switches, delay=delay, line=5)
+            else:
+                # from NAT
+                switches = deque(["-", "/", "|", "|", "|", "-", "|"])
+                line = Train(start_x=39, start_y=8, direction="<", grid=self, switches=switches, delay=delay, line=5)
+
+        elif line_number == 6:
+            if reverse is False:
+                # from TAT
+                switches = deque(["\\", "\\", "-", "|", "-", "-", "-"])
+                line = Train(start_x=39, start_y=13, direction="<", grid=self, switches=switches, delay=delay, line=6)
+            else:
+                # from HHF
+                switches = deque(["\\", "\\"])
+                line = Train(start_x=0, start_y=11, direction=">", grid=self, switches=switches, delay=delay, line=6)
+
+        elif line_number == 7:
+            if reverse is False:
+                # from NAT
+                switches = deque(["\\", "/", "|", "|", "\\"])
+                line = Train(start_x=39, start_y=8, direction="<", grid=self, switches=switches, delay=delay, line=7)
+            else:
+                # from KAB
+                switches = deque(["|", "\\", "/", "\\"])
+                line = Train(start_x=24, start_y=23, direction="^", grid=self, switches=switches, delay=delay, line=7)
+
         else:
-            # from KUB
-            switches = deque(["|", "|", "-", "-", "/"])
-            line = Train(start_x=19, start_y=0, direction="v", grid=grid, switches=switches, delay=delay, line=1)
+            raise NotImplemented("Line number is not implemented! Only lines 1,2,4,5,6,7 are implemented.")
 
-    elif line_number == 2:
-        if reverse is False:
-            # from NAT
-            switches = deque(["-", "/", "/", "-", "-", "\\", "/"])
-            line = Train(start_x=39, start_y=8, direction="<", grid=grid, switches=switches, delay=delay, line=2)
-        else:
-            # from KUB
-            switches = deque(["/", "\\", "-", "/", "/"])
-            line = Train(start_x=19, start_y=0, direction="v", grid=grid, switches=switches, delay=delay, line=2)
-
-    # Line 3 skipped because of grid architecture
-
-    elif line_number == 4:
-        if reverse is False:
-            # from KAB
-            switches = deque(["/", "|", "|", "\\", "\\", "|", "|"])
-            line = Train(start_x=24, start_y=23, direction="^", grid=grid, switches=switches, delay=delay, line=4)
-        else:
-            # from KUB
-            switches = deque(["|", "|", "\\"])
-            line = Train(start_x=19, start_y=0, direction="v", grid=grid, switches=switches, delay=delay, line=4)
-
-    elif line_number == 5:
-        if reverse is False:
-            # from KUB
-            switches = deque(["|", "|", "|", "-", "-", "|", "|", "|", "/"])
-            line = Train(start_x=19, start_y=0, direction="v", grid=grid, switches=switches, delay=delay, line=5)
-        else:
-            # from NAT
-            switches = deque(["-", "/", "|", "|", "|", "-", "|"])
-            line = Train(start_x=39, start_y=8, direction="<", grid=grid, switches=switches, delay=delay, line=5)
-
-    elif line_number == 6:
-        if reverse is False:
-            # from TAT
-            switches = deque(["\\", "\\", "-", "|", "-", "-", "-"])
-            line = Train(start_x=39, start_y=13, direction="<", grid=grid, switches=switches, delay=delay, line=6)
-        else:
-            # from HHF
-            switches = deque(["\\", "\\"])
-            line = Train(start_x=0, start_y=11, direction=">", grid=grid, switches=switches, delay=delay, line=6)
-
-    elif line_number == 7:
-        if reverse is False:
-            # from NAT
-            switches = deque(["\\", "/", "|", "|", "\\"])
-            line = Train(start_x=39, start_y=8, direction="<", grid=grid, switches=switches, delay=delay, line=7)
-        else:
-            # from KAB
-            switches = deque(["|", "\\", "/", "\\"])
-            line = Train(start_x=24, start_y=23, direction="^", grid=grid, switches=switches, delay=delay, line=7)
-
-    else:
-        raise NotImplemented("Line number is not implemented! Only lines 1,2,4,5,6,7 are implemented.")
-
-    return line
+        return line
 
 
 def step(grid, actions, *args):
@@ -593,7 +403,7 @@ def step(grid, actions, *args):
     elif grid.step % 10 == 9:
         trains.append(create_line(6, True, grid))
 
-    reward = grid.update_world()
+    reward = grid._update_world()
     print(f"Step: {grid.step}, {reward}")
     print(grid)
     # grid.update_signal_switches()
