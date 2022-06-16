@@ -7,15 +7,19 @@ class Signal:
         """
         self.status = 0
 
-    def change_status(self):
+    def turn_red(self):
         """
-        Switches the status of the signal between on (1 = red light) and off (0 = green light)
+        Switches the status of the signal to 1 (red light)
         :return:
         """
-        if self.status == 1:
-            self.status = 0
-        else:
-            self.status = 1
+        self.status = 1
+
+    def turn_green(self):
+        """
+        Switches the status of the signal to 0 (green light)
+        :return:
+        """
+        self.status = 0
 
 
 class Switch:
