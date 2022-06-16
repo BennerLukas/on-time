@@ -29,7 +29,7 @@ class Grid(gym.Env, ABC):
         # Grid components
         self.grid = None
         self.train_grid = None
-        self.step = 0
+        self.world_step = 0
         self._init_grid()
 
         # Gym specific variables
@@ -56,7 +56,7 @@ class Grid(gym.Env, ABC):
         self._add_lines()
         reward = self._update_world()
         obs_state = self._convert_to_observation_space()
-        if self.step > 400:
+        if self.world_step > 400:
             done = True
         else:
             done = False
@@ -73,6 +73,7 @@ class Grid(gym.Env, ABC):
     ) -> Union[ObsType, tuple[ObsType, dict]]:
         # TODO: Call Conversion for Observation
         self._init_grid()
+        self.world_step = 0
         obs_state = self._convert_to_observation_space()
         return obs_state
 
@@ -91,7 +92,7 @@ class Grid(gym.Env, ABC):
         :return: current grid step
         """
         self.train_grid[y][x] = train
-        return self.step
+        return self.world_step
 
     def _return_average_delay(self):
         delay = 0
@@ -133,22 +134,22 @@ class Grid(gym.Env, ABC):
         # Get delays at signal cluster 2 (Paradeplatz)
         # Northern Signal
         if type(self.train_grid[8][19]) == Train:
-            delay1 = self.train_grid[9][19].delay
+            delay1 = self.train_grid[8][19].delay
         else:
             delay1 = None
         # Southern signal
         if type(self.train_grid[12][20]) == Train:
-            delay2 = self.train_grid[7][20].delay
+            delay2 = self.train_grid[12][20].delay
         else:
             delay2 = None
         # Western signal
         if type(self.train_grid[11][18]) == Train:
-            delay3 = self.train_grid[4][18].delay
+            delay3 = self.train_grid[11][18].delay
         else:
             delay3 = None
         # Eastern signal
         if type(self.train_grid[10][22]) == Train:
-            delay4 = self.train_grid[3][22].delay
+            delay4 = self.train_grid[10][22].delay
         else:
             delay4 = None
         self.state["signal_cluster_paradeplatz"] = np.array([delay1, delay2, delay3, delay4], dtype=np.float32)
@@ -392,14 +393,14 @@ class Grid(gym.Env, ABC):
 
         # check which condition applies to the new position
         # Condition 1: Train on new position that hasn't moved on this step
-        if type(expected_new_tile) == Train and expected_new_tile.step != self.step:
+        if type(expected_new_tile) == Train and expected_new_tile.world_step != self.world_step:
             # recursive call for the train on new position
             reward += self._update_train(expected_new_tile)
             # move the original out of recursion train
             expected_new_tile.move(new_x, new_y, new_direction)
             return reward
         # Condition 2: Train on new position that has already moved this step
-        elif type(expected_new_tile) == Train and expected_new_tile.step == self.step:
+        elif type(expected_new_tile) == Train and expected_new_tile.world_step == self.world_step:
             return reward - 1
         # Condition 3: Nothing on the new position
         else:
@@ -407,80 +408,35 @@ class Grid(gym.Env, ABC):
             return reward + 0
 
     def _update_world(self):
-        self.step += 1
+        self.world_step += 1
         reward = 0
         for row in self.train_grid:
             for tile in row:
-                if type(tile) == Train and tile.step != self.step:
+                if type(tile) == Train and tile.world_step != self.world_step:
                     reward = 0 + self._update_train(tile.read_track())
         return reward
 
     def _update_signal(self, action_list):
         """
-
+        [0,0,2,3,4,3,2]
         :param action_list: list of 7 integers
         :return:
         """
         # Get delays at signal cluster 1 (Kurpfalzbrücke)
         # Northern signal
-        delay1 = self.grid[0][19].delay
-        # Southern signal
-        delay2 = self.grid[7][20].delay
-        # Western signal
-        delay3 = self.grid[4][17].delay
-        # Eastern signal
-        delay4 = self.grid[3][21].delay
-
-        # Get delays at signal cluster 2 (Paradeplatz)
-        # Northern Signal
-        delay1 = self.grid[9][19].delay
-        # Southern signal
-        delay2 = self.grid[7][20].delay
-        # Western signal
-        delay3 = self.grid[4][18].delay
-        # Eastern signal
-        delay4 = self.grid[3][22].delay
-
-        # Get delays at signal cluster 3 (Handelshafen)
-        # Northern Signal
-        delay1 = self.grid[9][2].delay
-        # Western signal
-        delay2 = self.grid[11][1].delay
-        # Eastern signal
-        delay3 = self.grid[10][5].delay
-
-        # Get delays at signal cluster 4 (Nationaltheater)
-        # Northern Signal
-        delay1 = self.grid[6][32].delay
-        # Southern signal
-        delay2 = self.grid[10][33].delay
-        # Eastern signal
-        delay3 = self.grid[7][35].delay
-
-        # Get delays at signal cluster 5 (Tattersall)
-        # Northern Signal
-        delay1 = self.grid[12][32].delay
-        # Southern signal
-        delay2 = self.grid[16][33].delay
-        # Eastern signal
-        delay3 = self.grid[13][35].delay
-
-        # Get delays at signal cluster 6 (Konrad-Adenauer-Brücke)
-        # Southern signal
-        delay1 = self.grid[22][23].delay
-        # Western signal
-        delay2 = self.grid[20][20].delay
-        # Eastern signal
-        delay3 = self.grid[19][24].delay
-
-        # Get delays at signal cluster 7 (Wasserturm)
-        # Southern signal
-        self.grid[12][34]
-        # Western signal
-        self.grid[20][32]
-
+        signal_positions = [[self.grid[0][19], self.grid[7][20], self.grid[4][17], self.grid[3][21]],
+                            [self.grid[8][19], self.grid[12][20], self.grid[11][18], self.grid[10][22]],
+                            [self.grid[9][2], self.grid[11][1], self.grid[10][5]],
+                            [self.grid[6][32], self.grid[10][33], self.grid[7][35]],
+                            [self.grid[12][32], self.grid[16][33], self.grid[13][35]],
+                            [self.grid[22][23], self.grid[20][20], self.grid[19][24]],
+                            [self.grid[12][34], self.grid[20][32]]]
+        for cnt, element in enumerate(action_list):
+            for signal in signal_positions[cnt]:
+                signal.turn_red()
+            if element != 0:
+                signal_positions[cnt][element-1].turn_green()
         return None
-
 
     def _create_line(self, line_number: int, reverse: bool):
         """
@@ -559,30 +515,30 @@ class Grid(gym.Env, ABC):
         return line
 
     def _add_lines(self):
-        if self.step % 20 == 0:
+        if self.world_step % 20 == 0:
             pass
     
-        elif self.step % 20 == 1:
+        elif self.world_step % 20 == 1:
             self._create_line(6, False)
     
-        elif self.step % 20 == 2:
+        elif self.world_step % 20 == 2:
             self._create_line(4, False)
             self._create_line(4, True)
     
-        elif self.step % 20 == 3:
+        elif self.world_step % 20 == 3:
             self._create_line(1, True)
     
-        elif self.step % 20 == 4:
+        elif self.world_step % 20 == 4:
             self._create_line(1, False)
         
-        elif self.step % 20 == 5:
+        elif self.world_step % 20 == 5:
             self._create_line(5, True)
         
-        elif self.step % 20 == 8:
+        elif self.world_step % 20 == 8:
             self._create_line(2, True)
             self._create_line(7, True)
     
-        elif self.step % 20 == 9:
+        elif self.world_step % 20 == 9:
             self._create_line(6, True)
             self._create_line(5, False)
             
@@ -622,5 +578,5 @@ if __name__ == "__main__":
     gridworld = Grid()
     trains = list()
     for i in range(80):
-        step(gridworld, None)
+        gridworld.world_step()
         time.sleep(.5)
