@@ -33,7 +33,7 @@ class Grid(gym.Env, ABC):
         self._init_grid()
 
         # Gym specific variables
-        self.state = dict
+        self.state = dict()
         self.action_space = spaces.MultiDiscrete([5, 5, 4, 4, 4, 4, 3])
         self.observation_space = spaces.Dict({"signal_cluster_kubruecke": spaces.Box(low=-2, high=20,
                                                                                      shape=(4,), dtype=np.float32),
@@ -51,8 +51,6 @@ class Grid(gym.Env, ABC):
                                                                                       shape=(2,), dtype=np.float32)})
 
     def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
-        # TODO: Convert Actions to Signal-Changes
-        # TODO: Create Observation from self.grid
         self._add_lines()
         reward = self._update_world()
         obs_state = self._convert_to_observation_space()
@@ -70,7 +68,7 @@ class Grid(gym.Env, ABC):
             seed: Optional[int] = None,
             return_info: bool = False,
             options: Optional[dict] = None,
-    ) -> Union[ObsType, tuple[ObsType, dict]]:
+    ):
         # TODO: Call Conversion for Observation
         self._init_grid()
         self.world_step = 0

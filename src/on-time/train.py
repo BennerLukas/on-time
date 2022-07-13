@@ -1,8 +1,10 @@
-from base import Grid
+# from base import Grid
 from helper import Switch, Signal, Stop
+import random
+
 
 class Train:
-    def __init__(self, start_x: int, start_y: int, direction: str, line: int, grid: Grid, switches: list[str],
+    def __init__(self, start_x: int, start_y: int, direction: str, line: int, grid, switches,
                  delay: int = 0):
         """
         :param start_x:
@@ -18,7 +20,7 @@ class Train:
         self.direction = direction
         self.grid = grid
         self.delay = delay
-        self.step = self.grid.add_train_to_grid(self.x, self.y, self)
+        self.world_step = self.grid.add_train_to_grid(self.x, self.y, self)
         self.switches = switches
         self.line_number = line
 
@@ -159,4 +161,4 @@ class Train:
 
         print(f"Train {self.line_number} \n From {new_x} | {new_y} to {self.x} | {self.y}")
 
-        self.step += 1
+        self.world_step += 1
