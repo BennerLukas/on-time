@@ -11,7 +11,6 @@ class Train:
         :param start_y:
         :param direction:
         :param grid:
-        :param stops:
         :param delay:
         :return:
         """

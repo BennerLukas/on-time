@@ -8,58 +8,27 @@ np.random.seed(seed)
 
 
 class Agent:
-    def __init__(self, env):
-        self.env = None
+    def __init__(self, env, obs_space_shape, action_space_shape):
+        self.env = env
+        self.obs_space_shape = obs_space_shape
+        self.action_space_shape = action_space_shape
 
-    # Brute Force - only exploration
-    def brute_force(self, state):
-        self.env.s = state
-        epochs = 0
-        penalties = 0
-        reward = 0
-        frames = list()  # for animation
-        # initial state
-        frames.append({
-            'frame': self.env.render(mode='ansi'),
-            'state': state,
-            'action': '--',
-            'reward': '--'
-        }
-        )
-        done = False
+    def brute_force(self):
+        self.env.reset()
+        state, reward, done, info = None, None, None, None
 
-        while not done:
-            # Next action is chosen randomly
-            action = self.env.action_space.sample()  # chooses random possible action
-            state, reward, done, info = self.env.world_step(action)
-            if reward == -10:
-                penalties += 1
-
-            # Put each rendered frame into dict for animation
-            frames.append({
-                'frame': self.env.render(mode='ansi'),
-                'state': state,
-                'action': action,
-                'reward': reward
-            }
-            )
-            epochs += 1
-        return frames, epochs, penalties
-
-    # Visualise frames
-    def print_frames(self, frames, time_btw_frames=0.1):
-        for i, frame in enumerate(frames):
-            clear_output(wait=True)
-            print(frame['frame'])
-            print(f"Timestep: {i}")
-            print(f"State: {frame['state']}")
-            print(f"Action: {frame['action']}")
-            print(f"Reward: {frame['reward']}")
-            time.sleep(time_btw_frames)
+        for _ in range(100):
+            action = self.env.action_space.sample()
+            state, reward, done, info = self.env.step(action)
+            print(f"Reward: {reward}, Done: {done}, Delay: {info['average_delay']}")
+            if done is True:
+                break
+        return state, reward, done, info
 
     # Train agent to find path using Reinforcement Learning
     def train_agent(self):
-        q_table = np.zeros([self.env.observation_space.n, self.env.action_space.n])
+        q_table = np.zeros([5, 7, 7])
+        # Weiche x Weichenstellung x Zugpositionen
         # Hyper-parameters
         # Learning rate
         alpha = 0.1
