@@ -42,9 +42,9 @@ class Switch:
         :param status_updated: new state for switch, is validated against base values
         :return: None
         """
-        if status_updated not in [self.default, self.status_switched]:
-            raise Exception(f"Switch forced to switch to wrong status! Was given {status_updated} but can only accept "
-                            f"{self.default, self.status_switched}")
+        # if status_updated not in [self.default, self.status_switched]:
+        #     raise Exception(f"Switch forced to switch to wrong status! Was given {status_updated} but can only accept "
+        #                     f"{self.default, self.status_switched}")
         self.status = status_updated
 
 

@@ -485,7 +485,7 @@ class Grid(gym.Env, ABC):
             else:
                 # from NAT
                 switches = deque(["-", "/", "|", "|", "|", "-", "|"])
-                line = Train(start_x=39, start_y=8, direction="<", grid=self, switches=switches, delay=delay, line=5)
+                line = Train(start_x=39, start_y=7, direction="<", grid=self, switches=switches, delay=delay, line=5)
 
         elif line_number == 6:
             if reverse is False:
@@ -530,10 +530,11 @@ class Grid(gym.Env, ABC):
             self._create_line(1, False)
         
         elif self.world_step % 20 == 5:
-            self._create_line(5, True)
+            # self._create_line(5, True)
+            pass
         
         elif self.world_step % 20 == 8:
-            self._create_line(2, True)
+            # self._create_line(2, True)
             self._create_line(7, True)
     
         elif self.world_step % 20 == 9:
