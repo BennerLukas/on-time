@@ -1,31 +1,28 @@
-# import ray
-# from ray.rllib import agents
-#
-# ray.init()
-# trainer = agents.a3c.A2CTrainer(env='CartPole-v0')
-#
-# trainer = agents.dqn.DQNTrainer(env='CartPole-v0') # Deep Q Network
-#
-# import ray
-# from ray.rllib import agents
-# ray.init() # Skip or set to ignore if already called
-# config = {'gamma': 0.9,
-#           'lr': 1e-2,
-#           'num_workers': 4,
-#           'train_batch_size': 1000,
-#           'model': {
-#               'fcnet_hiddens': [128, 128]
-#           }}
-# trainer = agents.ppo.PPOTrainer(env='CartPole-v0', config=config)
-# results = trainer.train()
+import ray  # install tensorflow beforehand manually
+# install CUDA manually - for GPU support
+
+from ray import tune
+import os
+
+ray.init(ignore_reinit_error=True)
+log_dir = "log_run"
+log_path = os.path.join(os.getcwd(), log_dir)
 
 
-import ray
-ray.init()
+# run without GPU
+print("Start RL with GPU ")
+tune.run("DQN",
+         config={
+             "env": "CartPole-v1",
+             "num_gpus": 1,  # with gpu
+             "seed": 123,
+             # "evaluation_interval": 2,
+             # "evaluation_duration": 10
+         },
+         local_dir=log_dir,
+         name="with_GPU",
+         stop=ray.tune.stopper.MaximumIterationStopper(10),
+         # time_budget_s=100
+         )
 
-@ray.remote
-def f(x):
-    return x * x
-
-futures = [f.remote(i) for i in range(4)]
-print(ray.get(futures))
+pass
