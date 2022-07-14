@@ -130,3 +130,5 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/src/on-time/log_run/with_GPU/
+/src/on-time/log_run/with_GPU/

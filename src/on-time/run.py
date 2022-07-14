@@ -13,10 +13,11 @@ log_path = os.path.join(os.getcwd(), log_dir)
 env = Grid()
 seed = 123
 max_iter = 100
+print(env.render())
 ##########################################################################################
 
 # run without GPU
-print("--Start RL with GPU--")
+print("--Start RL--")
 tune.run("DQN",
          config={
              "env": env,
