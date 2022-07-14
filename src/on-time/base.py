@@ -7,7 +7,6 @@ from typing import Tuple, Union, Optional
 import gym
 import numpy as np
 from gym import spaces
-from gym.core import ObsType, ActType
 
 from helper import Switch, Signal, Stop
 from train import Train
@@ -50,7 +49,7 @@ class Grid(gym.Env, ABC):
                                               "signal_cluster_wasserturm": spaces.Box(low=-2, high=20,
                                                                                       shape=(2,), dtype=np.float32)})
 
-    def step(self, action: ActType) -> Tuple[ObsType, float, bool, dict]:
+    def step(self, action):
         self._add_lines()
         reward = self._update_world()
         obs_state = self._convert_to_observation_space()

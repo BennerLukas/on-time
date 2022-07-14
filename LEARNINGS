@@ -1,1 +1,8 @@
+- Viele NEUE Erfahrungen mit OpenAI Gym
+    - Funktionsweise von customs env
+    - Ansprechen custom envs
+    - Entwickeln von custom envs
 
+- Reinforcment Learning
+    - Q-Learning from Scratch (ohne RL Modul) -> nicht erfolgreich, da Aufgaben zu komplex sind
+    - Ray RLlib -> schwerwiegende Probleme es zum Laufen zu bekommen
