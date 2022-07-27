@@ -563,35 +563,35 @@ class Grid(gym.Env, ABC):
             self._create_line(6, True)
             self._create_line(5, False)
             
-    def __str__(self):
-        """
-        Alternative print function to enable a proper view into the grid world.
-        :return: fancy output string
-        """
-        output = ""
-        # iterate over all rows
-        for y, row in enumerate(self.grid):
-            # iterate over all elements in the row
-            for x, col in enumerate(row):
-                # if there is no train on the grid coordinate look into the normal grid
-                if self.train_grid[y][x] == 0:
-                    if col == 0:
-                        output += "  "
-                    elif col in ["-", "|", "/"]:
-                        output += 2 * col
-                    elif col == "\\":
-                        output += col * 2
-                    elif type(col) == Signal:
-                        output += "S" + str(col.status)
-                    elif type(col) == Switch:
-                        output += "W" + col.status_switched
-                    elif type(col) == Stop:
-                        output += "SP"  # col.name[:2]
-                # if there is a train on this grid coordinate print the train instead
-                else:
-                    output += str(self.train_grid[y][x].line_number) + self.train_grid[y][x].direction
-            output += "\n"
-        return output
+    # def __str__(self):
+    #     """
+    #     Alternative print function to enable a proper view into the grid world.
+    #     :return: fancy output string
+    #     """
+    #     output = ""
+    #     # iterate over all rows
+    #     for y, row in enumerate(self.grid):
+    #         # iterate over all elements in the row
+    #         for x, col in enumerate(row):
+    #             # if there is no train on the grid coordinate look into the normal grid
+    #             if self.train_grid[y][x] == 0:
+    #                 if col == 0:
+    #                     output += "  "
+    #                 elif col in ["-", "|", "/"]:
+    #                     output += 2 * col
+    #                 elif col == "\\":
+    #                     output += col * 2
+    #                 elif type(col) == Signal:
+    #                     output += "S" + str(col.status)
+    #                 elif type(col) == Switch:
+    #                     output += "W" + col.status_switched
+    #                 elif type(col) == Stop:
+    #                     output += "SP"  # col.name[:2]
+    #             # if there is a train on this grid coordinate print the train instead
+    #             else:
+    #                 output += str(self.train_grid[y][x].line_number) + self.train_grid[y][x].direction
+    #         output += "\n"
+    #     return output
 
 
 
