@@ -8,15 +8,15 @@ import gym
 import numpy as np
 from gym import spaces
 
-from helper import Switch, Signal, Stop
-from train import Train
+
 import sys
 
 
-# TODO: Signal-Cluster (Kreuzungen) --> Observation Space: Signal-Cluster 1: {1: 5, 2: -1, 3: None}
-#                                      Action Space: Signal-Cluster 1: [1,2] => 1: Signal oben grün, Signal rechts rot
+from gridworld_gym.envs.helper import Signal, Switch, Stop
+from gridworld_gym.envs.train import Train
 
-class Grid(gym.Env, ABC):
+
+class GridWorldEnv(gym.Env, ABC):
     """The schematic of Mannheim's central metro system. It is simplified into a gridworld and slightly altered."""
 
     def __init__(self):
@@ -24,7 +24,7 @@ class Grid(gym.Env, ABC):
         Initializes all grid components with automatically generated components. Also sets the world steps to 0 as
         initial value.
         """
-        super(Grid, self).__init__()
+        super(GridWorldEnv, self).__init__()
         # Grid components
         self.grid = None
         self.train_grid = None

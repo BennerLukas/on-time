@@ -1,6 +1,8 @@
 # from base import Grid
-from helper import Switch, Signal, Stop
+
 import random
+
+from gridworld_gym.envs.helper import Switch, Signal, Stop
 
 
 class Train:

@@ -5,14 +5,23 @@ import ray
 from ray import tune
 import os
 
+
+# import gridworld_mannheim_gym
+
 # from base import Grid
 
+
+def env_creator():
+    from gridworld_gym.envs import GridWorldEnv as env
+    return env
+
+
 # configuration and init
-ray.init(ignore_reinit_error=True)
-log_dir = "log_run"
+log_dir = "src/on-time/log_run"
 log_path = os.path.join(os.getcwd(), log_dir)
 # env = Grid()
-env = gym.make('gym_example/gym_examples/GridWorld-v0')
+# env = gym.make('gridworld_gym:gridworld-v0')
+ray.init(local_mode=True, ignore_reinit_error=True)
 seed = 123
 max_iter = 100
 # print(env.render())
@@ -20,18 +29,20 @@ max_iter = 100
 
 # run without GPU
 print("--Start RL--")
-tune.run("DQN",
+tune.run("A3C",
          config={
-             "env": env,
+             "env": env_creator(),
              "num_gpus": 0,  # with gpu
-             "seed": seed,
+             "simple_optimizer":True
+             # "seed": seed,
              # "evaluation_interval": 2,
              # "evaluation_duration": 10
          },
          local_dir=log_dir,
          name="with_GPU",
          verbose=3,
-         stop=ray.tune.stopper.MaximumIterationStopper(max_iter)#,
+
+         stop=ray.tune.stopper.MaximumIterationStopper(max_iter)  # ,
          # time_budget_s=100
          )
 
