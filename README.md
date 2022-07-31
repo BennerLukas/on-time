@@ -13,10 +13,51 @@
 
 ## Usage
 
+For using our custom environment execute the following command
+```bash
+
+```
+
+
 ## Idea & Approach
-We want to deliver a service for railway and transport companies worldwide to decrease delays and increase the punctuality of trains. This increases customer satisfaction and therby the usage. This has a big benefit for our world, fighting against climate change and traffic jams.
+We want to deliver a service for railway and transport companies worldwide to decrease delays and increase the punctuality of trains. 
+This increases customer satisfaction and therby the usage. This has a big benefit for our world, fighting against climate change and traffic jams.
 
 ## Technology
+We use OpenAI Gym vor our own custom simulation. For developing the agent we use the new ray library. 
+It has a RLlib submodule where you can train different environments with different reinforcement learning algorithms.
+
+Here you can see the train map with all stops, lights and switches. 
+This what the agent is seeing (mathematically) to decide which switch to activate.
+```python
+                                     ||||                                      
+                                      S0||                                      
+                                      W/||                                      
+      //----SP----SP------SP----------||W/S0--------SP------------              
+    ||  ----SP----SP------SP------S0W/||||----------SP----------\\\\            
+    ||//                              ||W/                        \\\\          
+    ||||                              ||S0                          S0\\        
+    ||||                              ||||                          W\W/W\S0----
+    ||||                              ||||                          ||||--------
+    S0||                              S0||                          W/W/        
+----W\--W\S0--SP------SP--------------W\||W\S0--SP------------SP----||S0        
+--S0----------SP------SP------------S0||||------SP------------SPS0W\W/W\        
+                                      ||S0                          S0S0        
+                                      ||||                          W\W/W\S0SP--
+                                      ||||                          ||||----SP--
+                                      ||||                          ||W/        
+                                      ||||                          ||S0        
+                                      ||||                          ||||        
+                                      ||||                          //||        
+                                      \\  \\----W/S0--SP----------SP  ||        
+                                        --S0W\--W\----SP----------SP//          
+                                              ||W/                              
+                                              SPS0                              
+                                              ||||                              
+```
+The experiment to run the agent will be done in the run.py. It executes a DQN which learns the best policy.
+
+For performance increases are we using a GPU. With the help of CUDA and the underlying Tensorflow can the DQN model be trained faster.
 
 ## Team
 - [Ayman Madhour](https://github.com/Madhour)
@@ -26,5 +67,9 @@ We want to deliver a service for railway and transport companies worldwide to de
 - [Paula Hölterhoff](https://github.com/phoelti)
 
 ## Business
+for more see ```docs```. There you can find the BusinessModelCanvas, ValuePropositionCanvas and the PitchDeck.
 
 ## Documentation & further resources
+For information about our Learnings in this project see ```LEARNINGS.md```
+
+The underlaying theroy can be found in the indepth presentation

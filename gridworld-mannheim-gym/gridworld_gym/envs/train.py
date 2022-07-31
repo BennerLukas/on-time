@@ -30,7 +30,7 @@ class Train:
         grid_symbol = self.grid.grid[self.y][self.x]
 
         if type(grid_symbol) == Switch:
-            print(f"Line {self.line_number} || On Switch ({self.y}|{self.x}) || Have these symbols remaining: {self.switches} || Switch accepts: {grid_symbol.default,grid_symbol.status_switched}")
+            # print(f"Line {self.line_number} || On Switch ({self.y}|{self.x}) || Have these symbols remaining: {self.switches} || Switch accepts: {grid_symbol.default,grid_symbol.status_switched}")
             grid_symbol.change_status(self.switches.popleft())
             # print(self.y, self.x)
             grid_symbol = grid_symbol.status

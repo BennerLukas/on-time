@@ -8,9 +8,7 @@ import gym
 import numpy as np
 from gym import spaces
 
-
 import sys
-
 
 from gridworld_gym.envs.helper import Signal, Switch, Stop
 from gridworld_gym.envs.train import Train
@@ -19,7 +17,7 @@ from gridworld_gym.envs.train import Train
 class GridWorldEnv(gym.Env, ABC):
     """The schematic of Mannheim's central metro system. It is simplified into a gridworld and slightly altered."""
 
-    def __init__(self):
+    def __init__(self, config=False):
         """
         Initializes all grid components with automatically generated components. Also sets the world steps to 0 as
         initial value.
@@ -33,24 +31,30 @@ class GridWorldEnv(gym.Env, ABC):
 
         # Gym specific variables
         self.state = dict()
-        self.action_space = spaces.MultiDiscrete([5, 5, 4, 4, 4, 4, 3])
-        self.observation_space = spaces.Dict({"signal_cluster_kubruecke": spaces.Box(low=-2, high=20,
+        self.action_space = spaces.Tuple(
+            [spaces.Discrete(5), spaces.Discrete(5), spaces.Discrete(4), spaces.Discrete(4), spaces.Discrete(4),
+             spaces.Discrete(4),
+             spaces.Discrete(3)])
+        self.observation_space = spaces.Dict({"signal_cluster_kubruecke": spaces.Box(low=-20, high=20,
                                                                                      shape=(4,), dtype=np.float32),
-                                              "signal_cluster_paradeplatz": spaces.Box(low=-2, high=20,
+                                              "signal_cluster_paradeplatz": spaces.Box(low=-20, high=20,
                                                                                        shape=(4,), dtype=np.float32),
-                                              "signal_cluster_handelshafen": spaces.Box(low=-2, high=20,
+                                              "signal_cluster_handelshafen": spaces.Box(low=-20, high=20,
                                                                                         shape=(3,), dtype=np.float32),
-                                              "signal_cluster_nationaltheater": spaces.Box(low=-2, high=20,
-                                                                                           shape=(3,),dtype=np.float32),
-                                              "signal_cluster_tattersall": spaces.Box(low=-2, high=20,
+                                              "signal_cluster_nationaltheater": spaces.Box(low=-20, high=20,
+                                                                                           shape=(3,),
+                                                                                           dtype=np.float32),
+                                              "signal_cluster_tattersall": spaces.Box(low=-20, high=20,
                                                                                       shape=(3,), dtype=np.float32),
-                                              "signal_cluster_kabruecke": spaces.Box(low=-2, high=20,
+                                              "signal_cluster_kabruecke": spaces.Box(low=-20, high=20,
                                                                                      shape=(3,), dtype=np.float32),
-                                              "signal_cluster_wasserturm": spaces.Box(low=-2, high=20,
+                                              "signal_cluster_wasserturm": spaces.Box(low=-20, high=20,
                                                                                       shape=(2,), dtype=np.float32)})
 
     def step(self, action):
+        print(action)
         self._add_lines()
+        self._update_signal(action)
         reward = self._update_world()
         obs_state = self._convert_to_observation_space()
         if self.world_step > 400:
@@ -133,22 +137,22 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[0][19]) == Train:
             delay1 = self.train_grid[0][19].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Southern signal
         if type(self.train_grid[7][20]) == Train:
             delay2 = self.train_grid[7][20].delay
         else:
-            delay2 = None
+            delay2 = -2
         # Western signal
         if type(self.train_grid[4][17]) == Train:
             delay3 = self.train_grid[4][17].delay
         else:
-            delay3 = None
+            delay3 = -2
         # Eastern signal
         if type(self.train_grid[3][21]) == Train:
             delay4 = self.train_grid[3][21].delay
         else:
-            delay4 = None
+            delay4 = -2
         self.state["signal_cluster_kubruecke"] = np.array([delay1, delay2, delay3, delay4], dtype=np.float32)
 
         # Get delays at signal cluster 2 (Paradeplatz)
@@ -156,22 +160,22 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[8][19]) == Train:
             delay1 = self.train_grid[8][19].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Southern signal
         if type(self.train_grid[12][20]) == Train:
             delay2 = self.train_grid[12][20].delay
         else:
-            delay2 = None
+            delay2 = -2
         # Western signal
         if type(self.train_grid[11][18]) == Train:
             delay3 = self.train_grid[11][18].delay
         else:
-            delay3 = None
+            delay3 = -2
         # Eastern signal
         if type(self.train_grid[10][22]) == Train:
             delay4 = self.train_grid[10][22].delay
         else:
-            delay4 = None
+            delay4 = -2
         self.state["signal_cluster_paradeplatz"] = np.array([delay1, delay2, delay3, delay4], dtype=np.float32)
 
         # Get delays at signal cluster 3 (Handelshafen)
@@ -179,17 +183,17 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[9][2]) == Train:
             delay1 = self.train_grid[9][2].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Western signal
         if type(self.train_grid[11][1]) == Train:
             delay2 = self.train_grid[11][1].delay
         else:
-            delay2 = None
+            delay2 = -2
         # Eastern signal
         if type(self.train_grid[10][5]) == Train:
             delay3 = self.train_grid[10][5].delay
         else:
-            delay3 = None
+            delay3 = -2
         self.state["signal_cluster_handelshafen"] = np.array([delay1, delay2, delay3], dtype=np.float32)
 
         # Get delays at signal cluster 4 (Nationaltheater)
@@ -197,17 +201,17 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[6][32]) == Train:
             delay1 = self.train_grid[6][32].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Southern signal
         if type(self.train_grid[10][33]) == Train:
             delay2 = self.train_grid[10][33].delay
         else:
-            delay2 = None
+            delay2 = -2
         # Eastern signal
         if type(self.train_grid[7][35]) == Train:
             delay3 = self.train_grid[7][35].delay
         else:
-            delay3 = None
+            delay3 = -2
         self.state["signal_cluster_nationaltheater"] = np.array([delay1, delay2, delay3], dtype=np.float32)
 
         # Get delays at signal cluster 5 (Tattersall)
@@ -215,17 +219,17 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[12][32]) == Train:
             delay1 = self.train_grid[12][32].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Southern signal
         if type(self.train_grid[16][33]) == Train:
             delay2 = self.train_grid[16][33].delay
         else:
-            delay2 = None
+            delay2 = -2
         # Eastern signal
         if type(self.train_grid[13][35]) == Train:
             delay3 = self.train_grid[13][35].delay
         else:
-            delay3 = None
+            delay3 = -2
         self.state["signal_cluster_tattersall"] = np.array([delay1, delay2, delay3], dtype=np.float32)
 
         # Get delays at signal cluster 6 (Konrad-Adenauer-Brücke)
@@ -233,17 +237,17 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[22][23]) == Train:
             delay1 = self.train_grid[22][23].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Western signal
         if type(self.train_grid[20][20]) == Train:
             delay2 = self.train_grid[20][20].delay
         else:
-            delay2 = None
+            delay2 = -2
         # Eastern signal
         if type(self.train_grid[19][24]) == Train:
             delay3 = self.train_grid[19][24].delay
         else:
-            delay3 = None
+            delay3 = -2
         self.state["signal_cluster_kabruecke"] = np.array([delay1, delay2, delay3], dtype=np.float32)
 
         # Get delays at signal cluster 7 (Wasserturm)
@@ -251,12 +255,12 @@ class GridWorldEnv(gym.Env, ABC):
         if type(self.train_grid[12][34]) == Train:
             delay1 = self.train_grid[12][34].delay
         else:
-            delay1 = None
+            delay1 = -2
         # Western signal
         if type(self.train_grid[20][32]) == Train:
             delay2 = self.train_grid[20][32].delay
         else:
-            delay2 = None
+            delay2 = -2
         self.state["signal_cluster_wasserturm"] = np.array([delay1, delay2], dtype=np.float32)
         return self.state
 
@@ -455,7 +459,7 @@ class GridWorldEnv(gym.Env, ABC):
             for signal in signal_positions[cnt]:
                 signal.turn_red()
             if element != 0:
-                signal_positions[cnt][element-1].turn_green()
+                signal_positions[cnt][element - 1].turn_green()
         return None
 
     def _create_line(self, line_number: int, reverse: bool):
@@ -537,32 +541,32 @@ class GridWorldEnv(gym.Env, ABC):
     def _add_lines(self):
         if self.world_step % 20 == 0:
             pass
-    
+
         elif self.world_step % 20 == 1:
             self._create_line(6, False)
-    
+
         elif self.world_step % 20 == 2:
             self._create_line(4, False)
             self._create_line(4, True)
-    
+
         elif self.world_step % 20 == 3:
             self._create_line(1, True)
-    
+
         elif self.world_step % 20 == 4:
             self._create_line(1, False)
-        
+
         elif self.world_step % 20 == 5:
             # self._create_line(5, True)
             pass
-        
+
         elif self.world_step % 20 == 8:
             # self._create_line(2, True)
             self._create_line(7, True)
-    
+
         elif self.world_step % 20 == 9:
             self._create_line(6, True)
             self._create_line(5, False)
-            
+
     # def __str__(self):
     #     """
     #     Alternative print function to enable a proper view into the grid world.
@@ -592,7 +596,6 @@ class GridWorldEnv(gym.Env, ABC):
     #                 output += str(self.train_grid[y][x].line_number) + self.train_grid[y][x].direction
     #         output += "\n"
     #     return output
-
 
 
 if __name__ == "__main__":
