@@ -15,7 +15,11 @@
 
 For using our custom environment execute the following command
 ```bash
-
+python run.py
+```
+For than viewing the results start the tensorboard and see the visualisations in your browser.
+```bash
+tensorboard --logdir src/on-time/log_run
 ```
 
 

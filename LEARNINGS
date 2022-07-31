@@ -9,3 +9,6 @@
     - Ray RLlib -> schwerwiegende Probleme es zum Laufen zu bekommen
         - Als es dann läuft ist es sehr intuitiv und auf jeden Fall zukunftsträchtig!! -> wir schätzen es als neuen Industriestandard ein (Vergleichbar mit Spark)
     - Tensorboard -> eine sehr nützliche und schöne Benutzeroberfläche zum live tracking des Lernfortschritts eines (oderer mehrer) Modelle
+    - Custom Envs mit RLlib hat viele Herausforderungen und ist im Detail nicht ganz einfach
+    - Verschieden RL Algorithmen getestet -> siehe https://docs.ray.io/en/latest/rllib/rllib-algorithms.html#algorithms
+        (darunter DQN (nicht geeignet), R2D2, PPO, AlphaZero (nicht lauffähig), etc
