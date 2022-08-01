@@ -30,39 +30,40 @@ class GridWorldEnv(gym.Env, ABC):
         self._init_grid()
 
         # Gym specific variables
+        self.max_episode_steps = 400
         self.state = dict()
         self.action_space = spaces.Tuple(
             [spaces.Discrete(5), spaces.Discrete(5), spaces.Discrete(4), spaces.Discrete(4), spaces.Discrete(4),
              spaces.Discrete(4),
              spaces.Discrete(3)])
-        self.observation_space = spaces.Dict({"signal_cluster_kubruecke": spaces.Box(low=-20, high=20,
+        self.observation_space = spaces.Dict({"signal_cluster_kubruecke": spaces.Box(low=-np.inf, high=np.inf,
                                                                                      shape=(4,), dtype=np.float32),
-                                              "signal_cluster_paradeplatz": spaces.Box(low=-20, high=20,
+                                              "signal_cluster_paradeplatz": spaces.Box(low=-np.inf, high=np.inf,
                                                                                        shape=(4,), dtype=np.float32),
-                                              "signal_cluster_handelshafen": spaces.Box(low=-20, high=20,
+                                              "signal_cluster_handelshafen": spaces.Box(low=-np.inf, high=np.inf,
                                                                                         shape=(3,), dtype=np.float32),
-                                              "signal_cluster_nationaltheater": spaces.Box(low=-20, high=20,
+                                              "signal_cluster_nationaltheater": spaces.Box(low=-np.inf, high=np.inf,
                                                                                            shape=(3,),
                                                                                            dtype=np.float32),
-                                              "signal_cluster_tattersall": spaces.Box(low=-20, high=20,
+                                              "signal_cluster_tattersall": spaces.Box(low=-np.inf, high=np.inf,
                                                                                       shape=(3,), dtype=np.float32),
-                                              "signal_cluster_kabruecke": spaces.Box(low=-20, high=20,
+                                              "signal_cluster_kabruecke": spaces.Box(low=-np.inf, high=np.inf,
                                                                                      shape=(3,), dtype=np.float32),
-                                              "signal_cluster_wasserturm": spaces.Box(low=-20, high=20,
+                                              "signal_cluster_wasserturm": spaces.Box(low=-np.inf, high=np.inf,
                                                                                       shape=(2,), dtype=np.float32)})
 
     def step(self, action):
-        print(action)
+        # print(action)
         self._add_lines()
         self._update_signal(action)
         reward = self._update_world()
         obs_state = self._convert_to_observation_space()
-        if self.world_step > 400:
+        if self.world_step > 800:
             done = True
         else:
             done = False
         avrg_delay = self._return_average_delay()
-
+        # print(f"In Step {self.world_step} || Reward: {reward} || Average Delay: {avrg_delay}")
         return obs_state, reward, done, avrg_delay
 
     def reset(
@@ -401,8 +402,13 @@ class GridWorldEnv(gym.Env, ABC):
         if type(args[0]) == tuple:
             # list unpacking of args
             new_x, new_y, new_direction, reward, tile = args[0]
+            count = args[1]
         else:
-            new_x, new_y, new_direction, reward, tile = args[0].read_track()
+            # print("\n\nArgs!", args)
+            new_x, new_y, new_direction, reward, tile = args[0][0].read_track()
+            count = args[0][1]
+            if count >= 15:
+                return 0
 
         # check if train goes out-of-bounds and deletes it
         if new_x > 39 or new_x < 0 or new_y < 0 or new_y > 23:
@@ -415,17 +421,29 @@ class GridWorldEnv(gym.Env, ABC):
             # calculates the new position of the train
             expected_new_tile = self.train_grid[new_y][new_x]
 
+        # Change world step if condition 2
         # check which condition applies to the new position
         # Condition 1: Train on new position that hasn't moved on this step
-        if type(expected_new_tile) == Train and expected_new_tile.world_step != self.world_step:
-            # recursive call for the train on new position
-            reward += self._update_train(expected_new_tile)
-            # move the original out of recursion train
-            expected_new_tile.move(new_x, new_y, new_direction)
-            return reward
-        # Condition 2: Train on new position that has already moved this step
-        elif type(expected_new_tile) == Train and expected_new_tile.world_step == self.world_step:
-            return reward - 1
+        if type(expected_new_tile) == Train:
+            if expected_new_tile.world_step != self.world_step:
+                if expected_new_tile != tile:
+                    # recursive call for the train on new position
+                    # print(
+                    #     f"Train on next field: {expected_new_tile.line_number} ({expected_new_tile.world_step}). Current "
+                    #     f"Train: {tile.line_number} ({expected_new_tile.world_step}) \nIn Step {self.world_step} | At "
+                    #     f"{new_x} || {new_y}")
+
+                    reward = self._update_train([expected_new_tile, count + 1])
+                    # move the original out of recursion train
+                    expected_new_tile.move(new_x, new_y, new_direction)
+                else:
+                    reward = 0
+                return reward
+            # Condition 2: Train on new position that has already moved this step
+            elif expected_new_tile.world_step == self.world_step:
+                tile.world_step = self.world_step
+                expected_new_tile.move(new_x, new_y, new_direction)
+                return reward - 1
         # Condition 3: Nothing on the new position
         else:
             tile.move(new_x, new_y, new_direction)
@@ -437,7 +455,8 @@ class GridWorldEnv(gym.Env, ABC):
         for row in self.train_grid:
             for tile in row:
                 if type(tile) == Train and tile.world_step != self.world_step:
-                    reward = 0 + self._update_train(tile.read_track())
+                    reward += self._update_train(tile.read_track(), 0)
+        reward = max(reward, -100)
         return reward
 
     def _update_signal(self, action_list):
@@ -448,13 +467,13 @@ class GridWorldEnv(gym.Env, ABC):
         """
         # Get delays at signal cluster 1 (Kurpfalzbrücke)
         # Northern signal
-        signal_positions = [[self.grid[0][19], self.grid[7][20], self.grid[4][17], self.grid[3][21]],
-                            [self.grid[8][19], self.grid[12][20], self.grid[11][18], self.grid[10][22]],
+        signal_positions = [[self.grid[1][19], self.grid[6][20], self.grid[4][17], self.grid[3][21]],
+                            [self.grid[9][19], self.grid[12][20], self.grid[11][18], self.grid[10][22]],
                             [self.grid[9][2], self.grid[11][1], self.grid[10][5]],
-                            [self.grid[6][32], self.grid[10][33], self.grid[7][35]],
-                            [self.grid[12][32], self.grid[16][33], self.grid[13][35]],
-                            [self.grid[22][23], self.grid[20][20], self.grid[19][24]],
-                            [self.grid[12][34], self.grid[20][32]]]
+                            [self.grid[6][34], self.grid[10][35], self.grid[7][37]],
+                            [self.grid[12][34], self.grid[16][35], self.grid[13][37]],
+                            [self.grid[22][24], self.grid[20][21], self.grid[19][25]],
+                            [self.grid[12][35], self.grid[11][32]]]
         for cnt, element in enumerate(action_list):
             for signal in signal_positions[cnt]:
                 signal.turn_red()
@@ -472,14 +491,14 @@ class GridWorldEnv(gym.Env, ABC):
         """
         delay = random.randint(-3, 3)
         if line_number == 1:
-            if reverse is False:
-                # from TAT
-                switches = deque(["-", "/", "-", "|", "|"])
-                line = Train(start_x=39, start_y=13, direction="<", grid=self, switches=switches, delay=delay, line=1)
-            else:
-                # from KUB
-                switches = deque(["|", "|", "-", "-", "/"])
-                line = Train(start_x=19, start_y=0, direction="v", grid=self, switches=switches, delay=delay, line=1)
+            # if reverse is False:
+            # from TAT
+            switches = deque(["-", "/", "-", "|", "|"])
+            line = Train(start_x=39, start_y=13, direction="<", grid=self, switches=switches, delay=delay, line=1)
+            # else:
+            #     # from KUB
+            #     switches = deque(["|", "|", "-", "-", "/"])
+            #     line = Train(start_x=19, start_y=0, direction="v", grid=self, switches=switches, delay=delay, line=1)
 
         elif line_number == 2:
             if reverse is False:
@@ -599,8 +618,8 @@ class GridWorldEnv(gym.Env, ABC):
 
 
 if __name__ == "__main__":
-    gridworld = Grid()
+    gridworld = GridWorldEnv()
     trains = list()
     for i in range(80):
-        gridworld.world_step()
+        gridworld.step([1, 1, 1, 1, 1, 1, 1])
         time.sleep(.5)

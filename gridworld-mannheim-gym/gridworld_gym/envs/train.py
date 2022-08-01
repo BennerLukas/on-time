@@ -31,8 +31,10 @@ class Train:
 
         if type(grid_symbol) == Switch:
             # print(f"Line {self.line_number} || On Switch ({self.y}|{self.x}) || Have these symbols remaining: {self.switches} || Switch accepts: {grid_symbol.default,grid_symbol.status_switched}")
-            grid_symbol.change_status(self.switches.popleft())
-            # print(self.y, self.x)
+            try:
+                grid_symbol.change_status(self.switches.popleft())
+            except IndexError:
+                print(f"Popped from an empty dequeue. {self.line_number} at switch {self.y}|{self.x}")
             grid_symbol = grid_symbol.status
         elif type(grid_symbol) == Signal:
             grid_symbol = grid_symbol.status
@@ -147,13 +149,15 @@ class Train:
             direction = self.direction
 
         if grid_symbol == "10":
-            reward = min(round(10 - (abs(1 / 3 * self.delay ** 3) + abs(5 / 8 * self.delay)), 1), 10)
+            # reward = min(round(100 - (abs(1 / 3 * self.delay ** 3) + abs(5 / 8 * self.delay)), 1), 100)
+            reward = min(100-self.delay**2, 100)
         else:
             reward = 0
 
         return new_x, new_y, direction, reward, self
 
     def move(self, new_x, new_y, new_direction):
+        # print("Moving:", self)
         self.grid.train_grid[self.y][self.x] = 0
         self.grid.train_grid[new_y][new_x] = self
 
