@@ -1,0 +1,66 @@
+0                     ||
+1                     S|
+2                     W|
+3     /--H--H---H-----|WS----H------
+4    | --H--H---H---SW||-----H-----\\
+5    |/               |W            \\
+6    ||               |S             S\
+7    ||               ||             WWWS--
+8    ||               ||             ||----
+9    S|               S|             WW
+10 --W-WS-H---H-------W|WS-H------H--|S
+11 -S-----H---H------S||---H------HSWWW
+12                    |S             SS
+13                    ||             WWWSH-
+14                    ||             ||--H-
+15                    ||             |W
+16                    ||             |S
+17                    ||             ||
+18                    ||             /|
+19                    \ \--WS-H-----H |
+20                     -SW-W--H-----H/
+21                        |W
+22                        HS
+23                        ||
+
+
+
+Signal at:  (1, 19)
+Signal at:  (3, 21)
+Signal at:  (4, 17)
+Signal at:  (6, 20)
+Signal at:  (6, 34)
+Signal at:  (7, 37)
+Signal at:  (9, 2)
+Signal at:  (9, 19)
+Signal at:  (10, 5)
+Signal at:  (10, 22)
+Signal at:  (10, 35)
+Signal at:  (11, 1)
+Signal at:  (11, 18)
+Signal at:  (11, 32)
+Signal at:  (12, 20)
+Signal at:  (12, 34)
+Signal at:  (12, 35)
+Signal at:  (13, 37)
+Signal at:  (16, 35)
+Signal at:  (19, 25)
+Signal at:  (20, 21)
+Signal at:  (22, 24)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

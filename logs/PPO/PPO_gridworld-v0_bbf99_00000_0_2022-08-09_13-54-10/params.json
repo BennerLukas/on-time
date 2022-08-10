@@ -1,0 +1,9 @@
+{
+  "env": "gridworld-v0",
+  "evaluation_duration": 10,
+  "evaluation_interval": 2,
+  "horizon": 600,
+  "num_gpus": 0,
+  "seed": 123,
+  "soft_horizon": false
+}
