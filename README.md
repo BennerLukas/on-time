@@ -19,7 +19,7 @@ python run.py
 ```
 For than viewing the results start the tensorboard and see the visualisations in your browser.
 ```bash
-tensorboard --logdir src/on-time/log_run
+tensorboard --logdir logs
 ```
 
 
@@ -75,5 +75,9 @@ for more see ```docs```. There you can find the BusinessModelCanvas, ValuePropos
 
 ## Documentation & further resources
 For information about our Learnings in this project see ```LEARNINGS.md```
+The environment was tested with a PPO algorithm that was trained for 300 episodes. The reinforcement learning agent showed great improvement during 
+training as can be seen in the included SVG-graphs (```docs/code``` folder), which were exported from tensorboard. Furthermore,
+the latest checkpoint of the PPO agent can be found in the ```logs/PPO``` folder.
+![Mean reward per episode](./docs/code/ray_tune_episode_reward_mean.svg)
 
-The underlaying theroy can be found in the indepth presentation
+The underlaying theroy can be found in the indepth presentation.
