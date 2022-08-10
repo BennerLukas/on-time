@@ -12,8 +12,13 @@
 ![GitHub all releases](https://img.shields.io/github/downloads/BennerLukas/on-time/total)
 
 ## Usage
+To install all packages both the requirements and the local environment must be installed
+```bash
+pip install -r requirements.txt
+pip install -e gridworld-mannheim-gym
+```
 
-For using our custom environment execute the following command
+To start training on our custom environment execute the following command
 ```bash
 python run.py
 ```
@@ -25,7 +30,7 @@ tensorboard --logdir logs
 
 ## Idea & Approach
 We want to deliver a service for railway and transport companies worldwide to decrease delays and increase the punctuality of trains. 
-This increases customer satisfaction and therby the usage. This has a big benefit for our world, fighting against climate change and traffic jams.
+This increases customer satisfaction and thereby the usage. This has a big benefit for our world, fighting against climate change and traffic jams.
 
 ## Technology
 We use OpenAI Gym vor our own custom simulation. For developing the agent we use the new ray library. 
