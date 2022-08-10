@@ -37,9 +37,9 @@ We use OpenAI Gym vor our own custom simulation. For developing the agent we use
 It has a RLlib submodule where you can train different environments with different reinforcement learning algorithms.
 
 Here you can see the train map with all stops, lights and switches. 
-This what the agent is seeing (mathematically) to decide which switch to activate.
+This what the agent is seeing (mathematically) to decide which signal to activate.
 ```python
-                                     ||||                                      
+                                      ||||                                      
                                       S0||                                      
                                       W/||                                      
       //----SP----SP------SP----------||W/S0--------SP------------              
@@ -85,4 +85,4 @@ training as can be seen in the included SVG-graphs (```docs/code``` folder), whi
 the latest checkpoint of the PPO agent can be found in the ```logs/PPO``` folder.
 ![Mean reward per episode](./docs/code/ray_tune_episode_reward_mean.svg)
 
-The underlaying theroy can be found in the indepth presentation.
+The underlying theory can be found indepth in the presentation.
